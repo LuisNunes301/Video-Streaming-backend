@@ -197,30 +197,37 @@ graph TB
 
     User(("👤 Usuário"))
 
-    subgraph Docker["DOCKER CONTAINERS"]
+    subgraph Docker["CONTAINERS DOCKER"]
 
-        App["Spring Boot App<br/>Swagger + FFmpeg<br/>Porta 8080"]
+        Nginx["Nginx<br/>Reverse Proxy<br/>Porta 80"]
+        
+        App["Spring Boot App<br/>Swagger UI + FFmpeg<br/>Porta 8080"]
 
-        DB["PostgreSQL<br/>Porta 5432"]
+        DB["PostgreSQL<br/>Banco de Dados<br/>Porta 5432"]
 
-        Queue["RabbitMQ<br/>5672 / 15672"]
+        Queue["RabbitMQ<br/>Mensageria<br/>Portas: 5672, 15672"]
 
-        Storage["MinIO<br/>9000 / 9001"]
+        Storage["MinIO<br/>Armazenamento S3<br/>Portas: 9000, 9001"]
 
-        User <-->|HTTP REST + Swagger| App
-        App <-->|JPA| DB
-        App <-->|Mensageria| Queue
-        App <-->|S3 API| Storage
-        Queue -.->|Evento Assíncrono| App
+        User -->|HTTP /api| Nginx
+        Nginx -->|Proxy API| App
+        Nginx -->|Proxy Videos| Storage
+        Nginx -->|Proxy Console| Storage
+
+        App -->|JPA/Hibernate| DB
+        App -->|Mensagens| Queue
+        App -->|S3 API| Storage
+        Queue -.->|Processamento Assíncrono| App
     end
 
-    classDef app fill:#e3f2fd,stroke:#1565c0,stroke-width:3px
-    classDef infra fill:#e8f5e8,stroke:#2e7d32,stroke-width:3px
-    classDef externo fill:#fff3e0,stroke:#e65100,stroke-width:3px
+    classDef app fill:#e3f2fd,stroke:#1565c0,stroke-width:3px,r:10px
+    classDef infra fill:#e8f5e8,stroke:#2e7d32,stroke-width:3px,r:10px
+    classDef externo fill:#fff3e0,stroke:#e65100,stroke-width:3px,r:10px
+    classDef user fill:#f3e5f5,stroke:#7b1fa2,stroke-width:3px,r:10px
 
-    class App app
+    class App,Nginx app
     class DB,Queue,Storage infra
-
+    class User user
 
 ```
 ------------------------------------------------------------------------
