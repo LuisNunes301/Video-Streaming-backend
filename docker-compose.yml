@@ -44,7 +44,17 @@ services:
       - "${MINIO_CONSOLE_PORT}:9001"
     volumes:
       - minio_data:/data
-
+  nginx:
+    image: nginx:latest
+    container_name: mini_nginx
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - app
+      - minio
   app:
     build: .
     container_name: mini_app

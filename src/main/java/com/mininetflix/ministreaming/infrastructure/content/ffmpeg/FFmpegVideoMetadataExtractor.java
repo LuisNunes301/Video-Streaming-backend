@@ -18,9 +18,9 @@ public class FFmpegVideoMetadataExtractor implements VideoMetadataExtractor {
     private final VideoStorageService storageService;
 
     @Override
-    public VideoMetadata extract(String bucket, String objectKey) {
+    public VideoMetadata extract(String objectKey) {
 
-        File file = storageService.download(bucket, objectKey);
+        File file = storageService.download(objectKey);
 
         try {
 

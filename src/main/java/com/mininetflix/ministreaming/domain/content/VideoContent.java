@@ -6,7 +6,7 @@ public class VideoContent {
 
     private String id;
     private String title;
-    private String bucket;
+
     private String objectKey;
 
     private VideoStatus status;
@@ -29,13 +29,11 @@ public class VideoContent {
     public static VideoContent create(
             String id,
             String title,
-            String bucket,
             String objectKey) {
 
         VideoContent video = new VideoContent();
         video.id = id;
         video.title = title;
-        video.bucket = bucket;
         video.objectKey = objectKey;
         video.status = VideoStatus.UPLOADING;
         video.createdAt = Instant.now();
@@ -103,10 +101,6 @@ public class VideoContent {
 
     public String getTitle() {
         return title;
-    }
-
-    public String getBucket() {
-        return bucket;
     }
 
     public String getObjectKey() {

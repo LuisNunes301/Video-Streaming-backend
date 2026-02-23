@@ -1,6 +1,7 @@
 package com.mininetflix.ministreaming.infrastructure.user.persistence;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.stereotype.Repository;
 
@@ -39,5 +40,10 @@ public class UserJpaRepositoryAdapter implements UserRepository {
     @Override
     public boolean existsByName(String name) {
         return jpa.existsByName(name);
+    }
+
+    @Override
+    public Optional<User> findById(UUID id) {
+        return jpa.findById(id).map(UserEntity::toDomain);
     }
 }

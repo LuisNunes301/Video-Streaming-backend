@@ -4,7 +4,10 @@ import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,8 +16,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.mininetflix.ministreaming.application.user.dto.AuthenticateUserInput;
 import com.mininetflix.ministreaming.application.user.dto.AuthenticateUserOutput;
+import com.mininetflix.ministreaming.application.user.dto.GetCurrentUserOutput;
 import com.mininetflix.ministreaming.application.user.dto.RegisterUserInput;
 import com.mininetflix.ministreaming.application.user.usecase.AuthenticateUserUseCase;
+import com.mininetflix.ministreaming.application.user.usecase.GetCurrentUserUseCase;
 import com.mininetflix.ministreaming.application.user.usecase.RegisterUserUseCase;
 
 import com.mininetflix.ministreaming.web.controller.auth.dto.AuthRequest;
@@ -29,11 +34,14 @@ public class AuthController {
 
         private final RegisterUserUseCase registerUserUseCase;
         private final AuthenticateUserUseCase authenticateUserUseCase;
+        private final GetCurrentUserUseCase getCurrentUserUseCase;
 
         public AuthController(RegisterUserUseCase registerUserUseCase,
-                        AuthenticateUserUseCase authenticateUserUseCase) {
+                        AuthenticateUserUseCase authenticateUserUseCase,
+                        GetCurrentUserUseCase getCurrentUserUseCase) {
                 this.registerUserUseCase = registerUserUseCase;
                 this.authenticateUserUseCase = authenticateUserUseCase;
+                this.getCurrentUserUseCase = getCurrentUserUseCase;
         }
 
         @PostMapping("/register")
@@ -60,5 +68,15 @@ public class AuthController {
                 AuthenticateUserOutput output = authenticateUserUseCase.execute(input);
 
                 return ResponseEntity.ok(new AuthResponse(output.token()));
+        }
+
+        @GetMapping("/me")
+        public ResponseEntity<GetCurrentUserOutput> me(Authentication authentication) {
+
+                String userId = (String) authentication.getPrincipal();
+
+                GetCurrentUserOutput output = getCurrentUserUseCase.execute(userId);
+
+                return ResponseEntity.ok(output);
         }
 }

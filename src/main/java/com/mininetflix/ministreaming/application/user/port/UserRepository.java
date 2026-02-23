@@ -1,6 +1,7 @@
 package com.mininetflix.ministreaming.application.user.port;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import com.mininetflix.ministreaming.domain.user.User;
 
@@ -15,5 +16,7 @@ public interface UserRepository {
     boolean existsByEmail(String email);
 
     boolean existsByName(String name);
+
+    Optional<User> findById(UUID id);
 
 }

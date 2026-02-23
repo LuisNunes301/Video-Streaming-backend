@@ -33,12 +33,11 @@ public class UploadVideoUseCaseImpl implements UploadVideoUseCase {
                 String objectKey = UUID.randomUUID() + ".mp4";
                 String id = UUID.randomUUID().toString();
 
-                storageService.upload(input.bucket(), objectKey, input.file());
+                storageService.upload(objectKey, input.file());
 
                 VideoContent video = VideoContent.create(
                                 id,
                                 input.title(),
-                                input.bucket(),
                                 objectKey);
 
                 catalogRepository.save(video);
@@ -46,13 +45,11 @@ public class UploadVideoUseCaseImpl implements UploadVideoUseCase {
                 eventPublisher.publish(
                                 new VideoUploadedEvent(
                                                 video.getId(),
-                                                video.getBucket(),
                                                 video.getObjectKey()));
 
                 return new UploadVideoOutput(
                                 video.getId(),
                                 video.getTitle(),
-                                video.getBucket(),
                                 video.getObjectKey(), video.getStatus());
         }
 }

@@ -23,7 +23,6 @@ public class JpaVideoCatalogRepository implements VideoCatalogRepository {
                 VideoEntity entity = VideoEntity.builder()
                                 .id(video.getId())
                                 .title(video.getTitle())
-                                .bucket(video.getBucket())
                                 .objectKey(video.getObjectKey())
                                 .status(video.getStatus())
                                 .duration(video.getDuration())
@@ -58,7 +57,6 @@ public class JpaVideoCatalogRepository implements VideoCatalogRepository {
                 VideoContent video = VideoContent.create(
                                 entity.getId(),
                                 entity.getTitle(),
-                                entity.getBucket(),
                                 entity.getObjectKey());
 
                 // reconstrução do estado

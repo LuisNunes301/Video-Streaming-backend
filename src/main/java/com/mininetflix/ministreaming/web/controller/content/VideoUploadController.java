@@ -37,12 +37,10 @@ public class VideoUploadController {
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<UploadVideoOutput> upload(
             @RequestParam String title,
-            @RequestParam String bucket,
             @RequestParam MultipartFile file) {
 
         UploadVideoInput input = new UploadVideoInput(
                 title,
-                bucket,
                 file);
 
         return ResponseEntity.ok(

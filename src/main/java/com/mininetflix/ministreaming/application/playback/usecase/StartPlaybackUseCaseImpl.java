@@ -41,7 +41,7 @@ public class StartPlaybackUseCaseImpl implements StartPlaybackUseCase {
                                 .orElse(0.0);
                 String videoUrl = videoStorageService
                                 .generatePresignedUrl(
-                                                content.getBucket(),
+
                                                 content.getObjectKey());
 
                 return new StartPlaybackOutput(videoUrl, startAt);

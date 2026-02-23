@@ -7,11 +7,13 @@ import io.minio.MinioClient;
 
 @Configuration
 public class MinioConfig {
+
     @Bean
     public MinioClient minioClient(
             @Value("${minio.url}") String url,
             @Value("${minio.access-key}") String accessKey,
             @Value("${minio.secret-key}") String secretKey) {
+
         return MinioClient.builder()
                 .endpoint(url)
                 .credentials(accessKey, secretKey)

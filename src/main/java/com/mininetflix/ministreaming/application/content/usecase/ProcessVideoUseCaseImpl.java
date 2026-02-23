@@ -28,7 +28,6 @@ public class ProcessVideoUseCaseImpl implements ProcessVideoUseCase {
             repository.save(video);
 
             var metadata = metadataExtractor.extract(
-                    event.bucket(),
                     event.objectKey());
 
             video.markReady(
