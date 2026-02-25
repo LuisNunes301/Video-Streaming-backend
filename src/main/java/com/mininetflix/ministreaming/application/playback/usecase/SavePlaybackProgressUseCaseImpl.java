@@ -40,6 +40,9 @@ public class SavePlaybackProgressUseCaseImpl
                                 input.currentTime(),
                                 officialDuration);
 
+                System.out.println("Official duration: " + officialDuration);
+                System.out.println("New time: " + input.currentTime());
+                System.out.println("Threshold: " + (officialDuration * 0.95));
                 playbackRepository.save(state);
         }
 

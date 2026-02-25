@@ -76,9 +76,12 @@ public class PlaybackRepositoryImpl implements PlaybackRepository {
                                 entity.getUserId().toString(),
                                 entity.getContentId().toString());
 
-                state.updateProgress(
-                                entity.getCurrentTime(),
-                                entity.getCurrentTime());
+                state.setCurrentTime(entity.getCurrentTime());
+                state.setCompleted(entity.isCompleted());
+                state.setLastUpdated(
+                                entity.getUpdatedAt()
+                                                .atZone(ZoneId.systemDefault())
+                                                .toInstant());
 
                 return state;
         }
