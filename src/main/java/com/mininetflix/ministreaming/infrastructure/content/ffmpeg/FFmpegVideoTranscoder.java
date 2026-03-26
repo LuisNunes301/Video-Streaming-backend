@@ -20,27 +20,55 @@ public class FFmpegVideoTranscoder implements VideoTranscoder {
     @Override
     public String transcodeToHls(String videoId, String objectKey) {
 
+        File inputFile = storageService.download(objectKey);
+        String basePath = videoId + "/hls/";
+
+        File outputDir = new File("/tmp/" + basePath);
+        if (!outputDir.exists()) {
+            outputDir.mkdirs();
+        }
+
         try {
-            File inputFile = storageService.download(objectKey);
-
-            String basePath = videoId + "/hls/";
-
-            File outputDir = new File("/tmp/" + basePath);
-            if (!outputDir.exists()) {
-                outputDir.mkdirs();
-            }
-
-            String outputPlaylist = outputDir.getAbsolutePath() + "/master.m3u8";
 
             ProcessBuilder pb = new ProcessBuilder(
                     "ffmpeg",
                     "-i", inputFile.getAbsolutePath(),
-                    "-codec:", "copy",
-                    "-start_number", "0",
-                    "-hls_time", "10",
-                    "-hls_list_size", "0",
+
+                    "-filter_complex",
+                    "[0:v]split=4[v1][v2][v3][v4];" +
+                            "[v1]scale=1920:1080[v1out];" +
+                            "[v2]scale=1280:720[v2out];" +
+                            "[v3]scale=854:480[v3out];" +
+                            "[v4]scale=640:360[v4out]",
+
+                    "-map", "[v1out]", "-map", "0:a",
+                    "-map", "[v2out]", "-map", "0:a",
+                    "-map", "[v3out]", "-map", "0:a",
+                    "-map", "[v4out]", "-map", "0:a",
+
+                    "-c:v", "libx264",
+                    "-preset", "fast",
+                    "-crf", "23",
+                    "-c:a", "aac",
+
+                    "-b:v:0", "5000k",
+                    "-b:v:1", "3000k",
+                    "-b:v:2", "1500k",
+                    "-b:v:3", "800k",
+
                     "-f", "hls",
-                    outputPlaylist);
+                    "-hls_time", "6",
+                    "-hls_playlist_type", "vod",
+
+                    "-hls_segment_filename",
+                    outputDir.getAbsolutePath() + "/v%v/fileSequence%d.ts",
+
+                    "-master_pl_name", "master.m3u8",
+
+                    "-var_stream_map",
+                    "v:0,a:0 v:1,a:1 v:2,a:2 v:3,a:3",
+
+                    outputDir.getAbsolutePath() + "/v%v/prog_index.m3u8");
 
             pb.redirectErrorStream(true);
 
@@ -48,7 +76,10 @@ public class FFmpegVideoTranscoder implements VideoTranscoder {
 
             try (BufferedReader reader = new BufferedReader(
                     new InputStreamReader(process.getInputStream()))) {
-                while (reader.readLine() != null) {
+
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    System.out.println("[FFMPEG] " + line);
                 }
             }
 
@@ -58,19 +89,38 @@ public class FFmpegVideoTranscoder implements VideoTranscoder {
                 throw new RuntimeException("FFmpeg failed");
             }
 
-            File[] files = outputDir.listFiles();
-
-            if (files != null) {
-                for (File file : files) {
-                    String key = basePath + file.getName();
-                    storageService.uploadFile(key, file);
-                }
-            }
+            uploadDirectory(outputDir, basePath);
 
             return basePath + "master.m3u8";
 
         } catch (Exception e) {
             throw new RuntimeException(e);
+        } finally {
+            deleteDirectory(outputDir);
+            inputFile.delete();
         }
+    }
+
+    private void uploadDirectory(File dir, String basePath) {
+        for (File file : dir.listFiles()) {
+            if (file.isDirectory()) {
+                uploadDirectory(file, basePath + file.getName() + "/");
+            } else {
+                storageService.uploadFile(basePath + file.getName(), file);
+            }
+        }
+    }
+
+    private void deleteDirectory(File dir) {
+        if (dir == null || !dir.exists())
+            return;
+        for (File file : dir.listFiles()) {
+            if (file.isDirectory()) {
+                deleteDirectory(file);
+            } else {
+                file.delete();
+            }
+        }
+        dir.delete();
     }
 }

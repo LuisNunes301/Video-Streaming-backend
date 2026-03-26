@@ -88,7 +88,8 @@ public class VideoContent {
     public void markReady(
             Double duration,
             Long size,
-            String resolution,
+            Integer width,
+            Integer height,
             String thumbnailUrl,
             String hlsPlaylistUrl) {
 

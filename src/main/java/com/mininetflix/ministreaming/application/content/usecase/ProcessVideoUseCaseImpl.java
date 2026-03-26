@@ -46,7 +46,8 @@ public class ProcessVideoUseCaseImpl implements ProcessVideoUseCase {
             video.markReady(
                     metadata.duration(),
                     metadata.size(),
-                    metadata.resolution(),
+                    metadata.height(),
+                    metadata.width(),
                     null,
                     playlistKey);
 

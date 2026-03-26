@@ -1,6 +1,8 @@
 package com.mininetflix.ministreaming.infrastructure.content.ffmpeg;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.InputStreamReader;
 
 import org.springframework.stereotype.Component;
 
@@ -23,27 +25,50 @@ public class FFmpegVideoMetadataExtractor implements VideoMetadataExtractor {
 
         try {
 
-            ProcessBuilder durationBuilder = new ProcessBuilder(
+            // duration + size
+            ProcessBuilder formatPb = new ProcessBuilder(
                     "ffprobe",
                     "-v", "error",
                     "-show_entries", "format=duration,size",
                     "-of", "default=noprint_wrappers=1:nokey=1",
                     originalFile.getAbsolutePath());
 
-            Process process = durationBuilder.start();
+            Process formatProcess = formatPb.start();
 
-            String output = new String(process.getInputStream().readAllBytes());
-            process.waitFor();
+            BufferedReader formatReader = new BufferedReader(
+                    new InputStreamReader(formatProcess.getInputStream()));
 
-            String[] lines = output.split("\n");
+            double duration = Double.parseDouble(formatReader.readLine());
+            long size = Long.parseLong(formatReader.readLine());
 
-            Double duration = Double.parseDouble(lines[0]);
-            Long size = Long.parseLong(lines[1]);
+            formatProcess.waitFor();
+
+            // resolution
+            ProcessBuilder streamPb = new ProcessBuilder(
+                    "ffprobe",
+                    "-v", "error",
+                    "-select_streams", "v:0",
+                    "-show_entries", "stream=width,height",
+                    "-of", "csv=p=0",
+                    originalFile.getAbsolutePath());
+
+            Process streamProcess = streamPb.start();
+
+            BufferedReader streamReader = new BufferedReader(
+                    new InputStreamReader(streamProcess.getInputStream()));
+
+            String[] resolution = streamReader.readLine().split(",");
+
+            int width = Integer.parseInt(resolution[0]);
+            int height = Integer.parseInt(resolution[1]);
+
+            streamProcess.waitFor();
 
             return new VideoMetadata(
                     duration,
                     size,
-                    "unknown");
+                    width,
+                    height);
 
         } catch (Exception e) {
             throw new RuntimeException("Metadata extraction failed", e);
