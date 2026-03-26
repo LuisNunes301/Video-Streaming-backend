@@ -27,7 +27,8 @@ public class JpaVideoCatalogRepository implements VideoCatalogRepository {
                                 .status(video.getStatus())
                                 .duration(video.getDuration())
                                 .size(video.getSize())
-                                .resolution(video.getResolution())
+                                .height(video.getHeight())
+                                .width(video.getWidth())
                                 .thumbnailUrl(video.getThumbnailUrl())
                                 .hlsPlaylistUrl(video.getHlsPlaylistUrl())
                                 .processingError(video.getProcessingError())
@@ -61,7 +62,8 @@ public class JpaVideoCatalogRepository implements VideoCatalogRepository {
                                 entity.getStatus(),
                                 entity.getDuration(),
                                 entity.getSize(),
-                                entity.getResolution(),
+                                entity.getWidth(),
+                                entity.getHeight(),
                                 entity.getThumbnailUrl(),
                                 entity.getHlsPlaylistUrl(),
                                 entity.getProcessingError(),

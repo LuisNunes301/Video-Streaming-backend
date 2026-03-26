@@ -21,48 +21,39 @@ public class FFmpegVideoMetadataExtractor implements VideoMetadataExtractor {
     @Override
     public VideoMetadata extract(String objectKey) {
 
-        File originalFile = storageService.download(objectKey);
+        File file = storageService.download(objectKey);
 
         try {
 
-            // duration + size
-            ProcessBuilder formatPb = new ProcessBuilder(
+            ProcessBuilder pb = new ProcessBuilder(
                     "ffprobe",
                     "-v", "error",
-                    "-show_entries", "format=duration,size",
-                    "-of", "default=noprint_wrappers=1:nokey=1",
-                    originalFile.getAbsolutePath());
 
-            Process formatProcess = formatPb.start();
-
-            BufferedReader formatReader = new BufferedReader(
-                    new InputStreamReader(formatProcess.getInputStream()));
-
-            double duration = Double.parseDouble(formatReader.readLine());
-            long size = Long.parseLong(formatReader.readLine());
-
-            formatProcess.waitFor();
-
-            // resolution
-            ProcessBuilder streamPb = new ProcessBuilder(
-                    "ffprobe",
-                    "-v", "error",
                     "-select_streams", "v:0",
-                    "-show_entries", "stream=width,height",
-                    "-of", "csv=p=0",
-                    originalFile.getAbsolutePath());
 
-            Process streamProcess = streamPb.start();
+                    "-show_entries", "stream=width,height:format=duration,size",
 
-            BufferedReader streamReader = new BufferedReader(
-                    new InputStreamReader(streamProcess.getInputStream()));
+                    "-of", "default=noprint_wrappers=1:nokey=1",
 
-            String[] resolution = streamReader.readLine().split(",");
+                    file.getAbsolutePath());
 
-            int width = Integer.parseInt(resolution[0]);
-            int height = Integer.parseInt(resolution[1]);
+            Process process = pb.start();
 
-            streamProcess.waitFor();
+            String output = new String(process.getInputStream().readAllBytes());
+            process.waitFor();
+
+            String[] lines = output.split("\n");
+
+            // ordem agora é:
+            // width
+            // height
+            // duration
+            // size
+
+            int width = Integer.parseInt(lines[0]);
+            int height = Integer.parseInt(lines[1]);
+            double duration = Double.parseDouble(lines[2]);
+            long size = Long.parseLong(lines[3]);
 
             return new VideoMetadata(
                     duration,
@@ -73,7 +64,7 @@ public class FFmpegVideoMetadataExtractor implements VideoMetadataExtractor {
         } catch (Exception e) {
             throw new RuntimeException("Metadata extraction failed", e);
         } finally {
-            originalFile.delete();
+            file.delete();
         }
     }
 }

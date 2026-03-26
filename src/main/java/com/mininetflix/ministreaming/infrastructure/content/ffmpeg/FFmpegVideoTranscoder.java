@@ -3,6 +3,8 @@ package com.mininetflix.ministreaming.infrastructure.content.ffmpeg;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.stereotype.Component;
 
@@ -17,8 +19,14 @@ public class FFmpegVideoTranscoder implements VideoTranscoder {
 
     private final VideoStorageService storageService;
 
+    private static final List<VideoProfile> PROFILES = List.of(
+            new VideoProfile("1080p", 1920, 1080, "5000k"),
+            new VideoProfile("720p", 1280, 720, "3000k"),
+            new VideoProfile("480p", 854, 480, "1500k"),
+            new VideoProfile("360p", 640, 360, "800k"));
+
     @Override
-    public String transcodeToHls(String videoId, String objectKey) {
+    public String transcodeToHls(String videoId, String objectKey, int inputWidth) {
 
         File inputFile = storageService.download(objectKey);
         String basePath = videoId + "/hls/";
@@ -30,46 +38,68 @@ public class FFmpegVideoTranscoder implements VideoTranscoder {
 
         try {
 
-            ProcessBuilder pb = new ProcessBuilder(
-                    "ffmpeg",
-                    "-i", inputFile.getAbsolutePath(),
+            List<VideoProfile> profiles = selectProfiles(inputWidth);
 
-                    "-filter_complex",
-                    "[0:v]split=4[v1][v2][v3][v4];" +
-                            "[v1]scale=1920:1080[v1out];" +
-                            "[v2]scale=1280:720[v2out];" +
-                            "[v3]scale=854:480[v3out];" +
-                            "[v4]scale=640:360[v4out]",
+            if (profiles.isEmpty()) {
+                throw new RuntimeException("No valid profiles for this video");
+            }
 
-                    "-map", "[v1out]", "-map", "0:a",
-                    "-map", "[v2out]", "-map", "0:a",
-                    "-map", "[v3out]", "-map", "0:a",
-                    "-map", "[v4out]", "-map", "0:a",
+            List<String> command = new ArrayList<>();
 
-                    "-c:v", "libx264",
-                    "-preset", "fast",
-                    "-crf", "23",
-                    "-c:a", "aac",
+            command.add("ffmpeg");
+            command.add("-y");
+            command.add("-i");
+            command.add(inputFile.getAbsolutePath());
 
-                    "-b:v:0", "5000k",
-                    "-b:v:1", "3000k",
-                    "-b:v:2", "1500k",
-                    "-b:v:3", "800k",
+            command.add("-threads");
+            command.add(String.valueOf(Runtime.getRuntime().availableProcessors()));
 
-                    "-f", "hls",
-                    "-hls_time", "6",
-                    "-hls_playlist_type", "vod",
+            command.add("-filter_complex");
+            command.add(buildFilterComplex(profiles));
 
-                    "-hls_segment_filename",
-                    outputDir.getAbsolutePath() + "/v%v/fileSequence%d.ts",
+            for (int i = 0; i < profiles.size(); i++) {
+                command.add("-map");
+                command.add("[v" + i + "out]");
+                command.add("-map");
+                command.add("0:a");
+            }
 
-                    "-master_pl_name", "master.m3u8",
+            command.add("-c:v");
+            command.add("libx264");
+            command.add("-preset");
+            command.add("fast");
+            command.add("-crf");
+            command.add("23");
 
-                    "-var_stream_map",
-                    "v:0,a:0 v:1,a:1 v:2,a:2 v:3,a:3",
+            command.add("-c:a");
+            command.add("aac");
 
-                    outputDir.getAbsolutePath() + "/v%v/prog_index.m3u8");
+            for (int i = 0; i < profiles.size(); i++) {
+                command.add("-b:v:" + i);
+                command.add(profiles.get(i).bitrate());
+            }
 
+            command.add("-f");
+            command.add("hls");
+
+            command.add("-hls_time");
+            command.add("6");
+
+            command.add("-hls_playlist_type");
+            command.add("vod");
+
+            command.add("-hls_segment_filename");
+            command.add(outputDir.getAbsolutePath() + "/v%v/fileSequence%d.ts");
+
+            command.add("-master_pl_name");
+            command.add("master.m3u8");
+
+            command.add("-var_stream_map");
+            command.add(buildVarStreamMap(profiles.size()));
+
+            command.add(outputDir.getAbsolutePath() + "/v%v/prog_index.m3u8");
+
+            ProcessBuilder pb = new ProcessBuilder(command);
             pb.redirectErrorStream(true);
 
             Process process = pb.start();
@@ -101,6 +131,45 @@ public class FFmpegVideoTranscoder implements VideoTranscoder {
         }
     }
 
+    private List<VideoProfile> selectProfiles(int inputWidth) {
+        return PROFILES.stream()
+                .filter(p -> p.width() <= inputWidth)
+                .toList();
+    }
+
+    private String buildFilterComplex(List<VideoProfile> profiles) {
+
+        StringBuilder filter = new StringBuilder();
+
+        filter.append("[0:v]split=").append(profiles.size());
+
+        for (int i = 0; i < profiles.size(); i++) {
+            filter.append("[v").append(i).append("]");
+        }
+
+        filter.append(";");
+
+        for (int i = 0; i < profiles.size(); i++) {
+            var p = profiles.get(i);
+
+            filter.append("[v").append(i).append("]")
+                    .append("scale=").append(p.width()).append(":").append(p.height())
+                    .append("[v").append(i).append("out];");
+        }
+
+        return filter.toString();
+    }
+
+    private String buildVarStreamMap(int size) {
+        StringBuilder map = new StringBuilder();
+
+        for (int i = 0; i < size; i++) {
+            map.append("v:").append(i).append(",a:").append(i).append(" ");
+        }
+
+        return map.toString().trim();
+    }
+
     private void uploadDirectory(File dir, String basePath) {
         for (File file : dir.listFiles()) {
             if (file.isDirectory()) {
@@ -114,6 +183,7 @@ public class FFmpegVideoTranscoder implements VideoTranscoder {
     private void deleteDirectory(File dir) {
         if (dir == null || !dir.exists())
             return;
+
         for (File file : dir.listFiles()) {
             if (file.isDirectory()) {
                 deleteDirectory(file);
@@ -122,5 +192,12 @@ public class FFmpegVideoTranscoder implements VideoTranscoder {
             }
         }
         dir.delete();
+    }
+
+    private record VideoProfile(
+            String name,
+            int width,
+            int height,
+            String bitrate) {
     }
 }

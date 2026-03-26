@@ -38,7 +38,8 @@ public class VideoEntity {
 
     private Double duration;
     private Long size;
-    private String resolution;
+    private Integer width;
+    private Integer height;
 
     private String thumbnailUrl;
     private String hlsPlaylistUrl;

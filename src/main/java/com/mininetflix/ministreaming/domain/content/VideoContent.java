@@ -13,7 +13,8 @@ public class VideoContent {
 
     private Double duration;
     private Long size;
-    private String resolution;
+    private Integer width;
+    private Integer height;
 
     private String thumbnailUrl;
     private String hlsPlaylistUrl;
@@ -48,7 +49,8 @@ public class VideoContent {
             VideoStatus status,
             Double duration,
             Long size,
-            String resolution,
+            Integer width,
+            Integer height,
             String thumbnailUrl,
             String hlsPlaylistUrl,
             String processingError,
@@ -61,8 +63,9 @@ public class VideoContent {
         video.objectKey = objectKey;
         video.status = status;
         video.duration = duration;
+        video.width = width;
+        video.height = height;
         video.size = size;
-        video.resolution = resolution;
         video.thumbnailUrl = thumbnailUrl;
         video.hlsPlaylistUrl = hlsPlaylistUrl;
         video.processingError = processingError;
@@ -100,7 +103,8 @@ public class VideoContent {
 
         this.duration = duration;
         this.size = size;
-        this.resolution = resolution;
+        this.width = width;
+        this.height = height;
         this.thumbnailUrl = thumbnailUrl;
         this.hlsPlaylistUrl = hlsPlaylistUrl;
         this.processingError = null;
@@ -156,8 +160,12 @@ public class VideoContent {
         return size;
     }
 
-    public String getResolution() {
-        return resolution;
+    public Integer getWidth() {
+        return width;
+    }
+
+    public Integer getHeight() {
+        return height;
     }
 
     public String getThumbnailUrl() {
