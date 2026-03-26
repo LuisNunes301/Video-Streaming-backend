@@ -17,6 +17,7 @@ public class VideoUploadedConsumer {
 
     @RabbitListener(queues = RabbitConfig.VIDEO_UPLOADED_QUEUE)
     public void handle(VideoUploadedEvent event) {
+        System.out.println("EVENTO RECEBIDO: " + event.videoId());
         processVideoUseCase.execute(event);
     }
 }

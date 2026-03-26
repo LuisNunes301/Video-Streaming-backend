@@ -40,9 +40,7 @@ public class StartPlaybackUseCaseImpl implements StartPlaybackUseCase {
                                 .map(PlaybackState::getCurrentTime)
                                 .orElse(0.0);
                 String videoUrl = videoStorageService
-                                .generatePresignedUrl(
-
-                                                content.getObjectKey());
+                                .generatePresignedUrl(content.getHlsPlaylistUrl());
 
                 return new StartPlaybackOutput(videoUrl, startAt);
 

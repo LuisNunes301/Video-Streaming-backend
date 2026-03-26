@@ -9,9 +9,9 @@ COPY src ./src
 RUN mvn clean package -DskipTests
 
 # ---------- STAGE 2 - Runtime ----------
-FROM eclipse-temurin:17-jdk-alpine
+# Alpine + apk avoids heavy Ubuntu ffmpeg dependency pulls (often flaky on archive.ubuntu.com).
+FROM eclipse-temurin:17-jre-alpine
 
-# Instalar FFmpeg
 RUN apk add --no-cache ffmpeg
 
 WORKDIR /app

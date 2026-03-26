@@ -1,7 +1,6 @@
 package com.mininetflix.ministreaming.infrastructure.content.ffmpeg;
 
 import java.io.File;
-import java.io.IOException;
 
 import org.springframework.stereotype.Component;
 
@@ -20,48 +19,36 @@ public class FFmpegVideoMetadataExtractor implements VideoMetadataExtractor {
     @Override
     public VideoMetadata extract(String objectKey) {
 
-        File file = storageService.download(objectKey);
+        File originalFile = storageService.download(objectKey);
 
         try {
 
-            // 🎥 duração
             ProcessBuilder durationBuilder = new ProcessBuilder(
                     "ffprobe",
                     "-v", "error",
-                    "-show_entries", "format=duration",
+                    "-show_entries", "format=duration,size",
                     "-of", "default=noprint_wrappers=1:nokey=1",
-                    file.getAbsolutePath());
+                    originalFile.getAbsolutePath());
 
-            Process durationProcess = durationBuilder.start();
-            String durationOutput = new String(durationProcess.getInputStream().readAllBytes());
-            Double duration = Double.parseDouble(durationOutput.trim());
+            Process process = durationBuilder.start();
 
-            // 📐 resolução
-            ProcessBuilder resolutionBuilder = new ProcessBuilder(
-                    "ffprobe",
-                    "-v", "error",
-                    "-select_streams", "v:0",
-                    "-show_entries", "stream=width,height",
-                    "-of", "csv=s=x:p=0",
-                    file.getAbsolutePath());
+            String output = new String(process.getInputStream().readAllBytes());
+            process.waitFor();
 
-            Process resolutionProcess = resolutionBuilder.start();
-            String resolution = new String(resolutionProcess.getInputStream().readAllBytes()).trim();
+            String[] lines = output.split("\n");
 
-            // 📦 tamanho
-            Long size = file.length();
-
-            file.delete();
+            Double duration = Double.parseDouble(lines[0]);
+            Long size = Long.parseLong(lines[1]);
 
             return new VideoMetadata(
                     duration,
                     size,
-                    resolution,
-                    null // HLS será gerado em outro passo
-            );
+                    "unknown");
 
-        } catch (IOException e) {
-            throw new RuntimeException("Error extracting video metadata", e);
+        } catch (Exception e) {
+            throw new RuntimeException("Metadata extraction failed", e);
+        } finally {
+            originalFile.delete();
         }
     }
 }

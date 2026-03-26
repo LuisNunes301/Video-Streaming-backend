@@ -16,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.mininetflix.ministreaming.application.content.port.VideoStorageService;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.util.concurrent.TimeUnit;
 
@@ -100,6 +101,20 @@ public class MinioVideoStorageService implements VideoStorageService {
 
         } catch (Exception e) {
             throw new RuntimeException("Download failed", e);
+        }
+    }
+
+    @Override
+    public void uploadFile(String objectKey, File file) {
+        try {
+            minioClient.putObject(
+                    PutObjectArgs.builder()
+                            .bucket(bucket)
+                            .object(objectKey)
+                            .stream(new FileInputStream(file), file.length(), -1)
+                            .build());
+        } catch (Exception e) {
+            throw new RuntimeException("Upload file failed", e);
         }
     }
 }

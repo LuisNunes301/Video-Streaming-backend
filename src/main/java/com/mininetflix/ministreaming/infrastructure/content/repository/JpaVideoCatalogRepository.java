@@ -54,35 +54,18 @@ public class JpaVideoCatalogRepository implements VideoCatalogRepository {
 
         private VideoContent toDomain(VideoEntity entity) {
 
-                VideoContent video = VideoContent.create(
+                return VideoContent.restore(
                                 entity.getId(),
                                 entity.getTitle(),
-                                entity.getObjectKey());
-
-                // reconstrução do estado
-                if (entity.getStatus() == null) {
-                        return video;
-                }
-
-                switch (entity.getStatus()) {
-                        case PROCESSING -> video.markProcessing();
-                        case READY -> {
-                                video.markProcessing();
-                                video.markReady(
-                                                entity.getDuration(),
-                                                entity.getSize(),
-                                                entity.getResolution(),
-                                                entity.getThumbnailUrl(),
-                                                entity.getHlsPlaylistUrl());
-                        }
-                        case FAILED -> {
-                                video.markProcessing();
-                                video.markFailed(entity.getProcessingError());
-                        }
-                        default -> {
-                        }
-                }
-
-                return video;
+                                entity.getObjectKey(),
+                                entity.getStatus(),
+                                entity.getDuration(),
+                                entity.getSize(),
+                                entity.getResolution(),
+                                entity.getThumbnailUrl(),
+                                entity.getHlsPlaylistUrl(),
+                                entity.getProcessingError(),
+                                entity.getCreatedAt(),
+                                entity.getProcessedAt());
         }
 }

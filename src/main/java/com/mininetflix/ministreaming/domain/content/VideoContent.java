@@ -41,11 +41,47 @@ public class VideoContent {
         return video;
     }
 
+    public static VideoContent restore(
+            String id,
+            String title,
+            String objectKey,
+            VideoStatus status,
+            Double duration,
+            Long size,
+            String resolution,
+            String thumbnailUrl,
+            String hlsPlaylistUrl,
+            String processingError,
+            Instant createdAt,
+            Instant processedAt) {
+
+        VideoContent video = new VideoContent();
+        video.id = id;
+        video.title = title;
+        video.objectKey = objectKey;
+        video.status = status;
+        video.duration = duration;
+        video.size = size;
+        video.resolution = resolution;
+        video.thumbnailUrl = thumbnailUrl;
+        video.hlsPlaylistUrl = hlsPlaylistUrl;
+        video.processingError = processingError;
+        video.createdAt = createdAt;
+        video.processedAt = processedAt;
+
+        return video;
+    }
+
     public void markProcessing() {
+        if (this.status == VideoStatus.PROCESSING) {
+            return;
+        }
+
         if (this.status != VideoStatus.UPLOADING) {
             throw new IllegalStateException(
                     "Video can only move to PROCESSING from UPLOADING");
         }
+
         this.status = VideoStatus.PROCESSING;
     }
 

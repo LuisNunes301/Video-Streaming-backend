@@ -3,6 +3,7 @@ package com.mininetflix.ministreaming.application.content.usecase;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.mininetflix.ministreaming.application.content.dto.UploadVideoInput;
 import com.mininetflix.ministreaming.application.content.dto.UploadVideoOutput;
@@ -24,14 +25,15 @@ public class UploadVideoUseCaseImpl implements UploadVideoUseCase {
         private final DomainEventPublisher eventPublisher;
 
         @Override
+        @Transactional
         public UploadVideoOutput execute(UploadVideoInput input) {
 
                 if (!"video/mp4".equals(input.file().getContentType())) {
                         throw new IllegalArgumentException("Only MP4 files are allowed");
                 }
 
-                String objectKey = UUID.randomUUID() + ".mp4";
                 String id = UUID.randomUUID().toString();
+                String objectKey = id + "/original.mp4";
 
                 storageService.upload(objectKey, input.file());
 

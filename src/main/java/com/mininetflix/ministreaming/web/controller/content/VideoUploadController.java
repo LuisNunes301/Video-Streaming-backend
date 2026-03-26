@@ -47,7 +47,7 @@ public class VideoUploadController {
                 uploadVideoUseCase.execute(input));
     }
 
-    // 🔥 Listar catálogo
+    // Listar catálogo
     @GetMapping
     public ResponseEntity<List<VideoContent>> list() {
         return ResponseEntity.ok(

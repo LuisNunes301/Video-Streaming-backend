@@ -8,6 +8,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -28,6 +29,7 @@ public class VideoEntity {
     private String id;
 
     private String title;
+
     private String bucket;
     private String objectKey;
 
@@ -45,4 +47,9 @@ public class VideoEntity {
 
     private Instant createdAt;
     private Instant processedAt;
+
+    @PrePersist
+    public void prePersist() {
+        this.createdAt = Instant.now();
+    }
 }
