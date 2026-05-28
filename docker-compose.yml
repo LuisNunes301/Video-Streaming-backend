@@ -44,6 +44,22 @@ services:
       - "${MINIO_CONSOLE_PORT}:9001"
     volumes:
       - minio_data:/data
+
+  minio-init:
+    image: minio/mc
+    container_name: mini_minio_init
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+      echo 'Aguardando MinIO...';
+      sleep 5;
+      mc alias set local http://minio:9000 ${MINIO_USER} ${MINIO_PASSWORD};
+      mc mb local/videos || true;
+      mc anonymous set download local/videos;
+      echo 'Bucket configurado como público';
+      exit 0;
+      "
   nginx:
     image: nginx:latest
     container_name: mini_nginx
