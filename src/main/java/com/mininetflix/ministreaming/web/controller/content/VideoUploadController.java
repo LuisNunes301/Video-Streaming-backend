@@ -43,8 +43,8 @@ public class VideoUploadController {
                 title,
                 file);
 
-        return ResponseEntity.ok(
-                uploadVideoUseCase.execute(input));
+        return ResponseEntity.accepted()
+                .body(uploadVideoUseCase.execute(input));
     }
 
     // Listar catálogo
