@@ -1,8 +1,6 @@
 package com.mininetflix.ministreaming.infrastructure.content.ffmpeg;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.InputStreamReader;
 
 import org.springframework.stereotype.Component;
 

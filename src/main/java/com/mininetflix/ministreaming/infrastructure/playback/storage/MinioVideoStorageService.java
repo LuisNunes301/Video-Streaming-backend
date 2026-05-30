@@ -5,7 +5,6 @@ import io.minio.GetObjectArgs;
 import io.minio.GetPresignedObjectUrlArgs;
 import io.minio.MakeBucketArgs;
 import io.minio.MinioClient;
-import io.minio.MinioProperties;
 import io.minio.PutObjectArgs;
 import io.minio.http.Method;
 
