@@ -38,7 +38,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/login", "/auth/register").permitAll()
-                        .requestMatchers("/videos/**").hasRole("ADMIN")
+                        .requestMatchers("/videos/**").authenticated()
                         .requestMatchers("/playback/**").authenticated()
                         .requestMatchers(
                                 "/v3/api-docs/**",
