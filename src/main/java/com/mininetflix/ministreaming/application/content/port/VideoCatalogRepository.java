@@ -15,4 +15,6 @@ public interface VideoCatalogRepository {
 
     List<VideoContent> findByCategory(VideoCategory category);
 
+    List<VideoContent> searchByTitle(String query);
+
 }

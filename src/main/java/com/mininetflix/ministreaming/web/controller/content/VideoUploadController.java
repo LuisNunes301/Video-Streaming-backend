@@ -1,5 +1,6 @@
 package com.mininetflix.ministreaming.web.controller.content;
 
+import com.mininetflix.ministreaming.application.content.usecase.SearchVideosUseCaseImpl;
 import java.util.List;
 
 import org.springframework.http.MediaType;
@@ -18,6 +19,7 @@ import com.mininetflix.ministreaming.application.content.dto.VideoResponse;
 import com.mininetflix.ministreaming.application.content.port.VideoCatalogRepository;
 import com.mininetflix.ministreaming.application.content.usecase.ListVideosByCategoryUseCase;
 import com.mininetflix.ministreaming.application.content.usecase.ListVideosUseCase;
+import com.mininetflix.ministreaming.application.content.usecase.SearchVideosUseCase;
 import com.mininetflix.ministreaming.application.content.usecase.UploadVideoUseCase;
 import com.mininetflix.ministreaming.domain.content.VideoCategory;
 import com.mininetflix.ministreaming.domain.content.VideoContent;
@@ -26,20 +28,25 @@ import com.mininetflix.ministreaming.domain.content.VideoContent;
 @RequestMapping("/videos")
 public class VideoUploadController {
 
+        private final SearchVideosUseCaseImpl searchVideosUseCaseImpl;
         private final UploadVideoUseCase uploadVideoUseCase;
         private final VideoCatalogRepository catalogRepository;
         private final ListVideosUseCase listVideoUseCase;
         private final ListVideosByCategoryUseCase listVideosByCategoryUseCase;
+        private final SearchVideosUseCase searchVideosUseCase;
 
         public VideoUploadController(
                         UploadVideoUseCase uploadVideoUseCase,
                         VideoCatalogRepository catalogRepository,
-                        ListVideosUseCase listVideoUseCase, ListVideosByCategoryUseCase listVideosByCategoryUseCase) {
+                        ListVideosUseCase listVideoUseCase, ListVideosByCategoryUseCase listVideosByCategoryUseCase,
+                        SearchVideosUseCase searchVideosUseCase, SearchVideosUseCaseImpl searchVideosUseCaseImpl) {
 
                 this.uploadVideoUseCase = uploadVideoUseCase;
                 this.catalogRepository = catalogRepository;
                 this.listVideoUseCase = listVideoUseCase;
                 this.listVideosByCategoryUseCase = listVideosByCategoryUseCase;
+                this.searchVideosUseCase = searchVideosUseCase;
+                this.searchVideosUseCaseImpl = searchVideosUseCaseImpl;
         }
 
         @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -80,4 +87,13 @@ public class VideoUploadController {
                 return ResponseEntity.ok(
                                 listVideosByCategoryUseCase.execute(category));
         }
+
+        @GetMapping("/search")
+        public ResponseEntity<List<VideoResponse>> search(
+                        @RequestParam String q) {
+
+                return ResponseEntity.ok(
+                                searchVideosUseCase.execute(q));
+        }
+
 }

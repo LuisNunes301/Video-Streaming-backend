@@ -1,29 +1,27 @@
 package com.mininetflix.ministreaming.application.content.usecase;
 
-import com.mininetflix.ministreaming.application.content.mappers.VideoResponseMapper;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
 
 import com.mininetflix.ministreaming.application.content.dto.VideoResponse;
+import com.mininetflix.ministreaming.application.content.mappers.VideoResponseMapper;
 import com.mininetflix.ministreaming.application.content.port.VideoCatalogRepository;
-
-import com.mininetflix.ministreaming.domain.content.VideoCategory;
 
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class ListVideosByCategoryUseCaseImpl
-                implements ListVideosByCategoryUseCase {
+public class SearchVideosUseCaseImpl
+                implements SearchVideosUseCase {
 
-        private final VideoResponseMapper videoResponseMapper;
         private final VideoCatalogRepository repository;
+        private final VideoResponseMapper videoResponseMapper;
 
         @Override
-        public List<VideoResponse> execute(VideoCategory category) {
+        public List<VideoResponse> execute(String query) {
 
-                return repository.findByCategory(category)
+                return repository.searchByTitle(query)
                                 .stream()
                                 .map(videoResponseMapper::toResponse)
                                 .toList();

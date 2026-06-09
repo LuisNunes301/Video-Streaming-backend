@@ -82,4 +82,14 @@ public class JpaVideoCatalogRepository implements VideoCatalogRepository {
                                 .toList();
         }
 
+        @Override
+        public List<VideoContent> searchByTitle(String query) {
+
+                return jpaRepository
+                                .findByTitleContainingIgnoreCase(query)
+                                .stream()
+                                .map(this::toDomain)
+                                .toList();
+        }
+
 }

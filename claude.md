@@ -244,7 +244,7 @@ Sem chamadas adicionais.
 
 ---
 
-# Prioridade 2 - Categorias Fortes
+# Prioridade 2 - Categorias Fortes feito
 
 ## Problema
 
