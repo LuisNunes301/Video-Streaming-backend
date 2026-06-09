@@ -31,7 +31,6 @@ public class ProcessVideoUseCaseImpl implements ProcessVideoUseCase {
         if (video.getStatus() == VideoStatus.PROCESSING ||
                 video.getStatus() == VideoStatus.READY) {
 
-            System.out.println(">>> IGNORANDO: já processado ou em processamento");
             return;
         }
 

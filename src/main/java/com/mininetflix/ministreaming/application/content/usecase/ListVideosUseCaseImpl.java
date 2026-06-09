@@ -6,14 +6,17 @@ import org.springframework.stereotype.Service;
 
 import com.mininetflix.ministreaming.application.content.dto.VideoResponse;
 import com.mininetflix.ministreaming.application.content.port.VideoCatalogRepository;
+import com.mininetflix.ministreaming.application.content.port.VideoStorageService;
 
 @Service
 public class ListVideosUseCaseImpl implements ListVideosUseCase {
 
     private final VideoCatalogRepository repository;
+    private final VideoStorageService storageService;
 
-    public ListVideosUseCaseImpl(VideoCatalogRepository repository) {
+    public ListVideosUseCaseImpl(VideoCatalogRepository repository, VideoStorageService storageService) {
         this.repository = repository;
+        this.storageService = storageService;
     }
 
     @Override
@@ -25,8 +28,10 @@ public class ListVideosUseCaseImpl implements ListVideosUseCase {
                         video.getId(),
                         video.getTitle(),
                         video.getStatus(),
+                        video.getCategory(),
                         video.getDuration(),
-                        video.getThumbnailUrl()))
+                        storageService.generatePublicUrl(
+                                video.getThumbnailKey())))
                 .toList();
     }
 

@@ -16,54 +16,56 @@ import com.mininetflix.ministreaming.application.content.port.DomainEventPublish
 import com.mininetflix.ministreaming.application.content.port.VideoCatalogRepository;
 import com.mininetflix.ministreaming.application.content.port.VideoStorageService;
 import com.mininetflix.ministreaming.application.content.usecase.UploadVideoUseCaseImpl;
+import com.mininetflix.ministreaming.domain.content.VideoCategory;
 import com.mininetflix.ministreaming.domain.content.VideoContent;
 import com.mininetflix.ministreaming.domain.content.event.VideoUploadedEvent;
 
 @ExtendWith(MockitoExtension.class)
 class UploadVideoUseCaseImplTest {
 
-    @Mock
-    private VideoStorageService storageService;
+        @Mock
+        private VideoStorageService storageService;
 
-    @Mock
-    private VideoCatalogRepository catalogRepository;
+        @Mock
+        private VideoCatalogRepository catalogRepository;
 
-    @Mock
-    private DomainEventPublisher eventPublisher;
+        @Mock
+        private DomainEventPublisher eventPublisher;
 
-    @InjectMocks
-    private UploadVideoUseCaseImpl useCase;
+        @InjectMocks
+        private UploadVideoUseCaseImpl useCase;
 
-    @Test
-    void shouldUploadVideoSuccessfully() {
+        @Test
+        void shouldUploadVideoSuccessfully() {
 
-        MockMultipartFile file = new MockMultipartFile(
-                "file",
-                "video.mp4",
-                "video/mp4",
-                "fake-video-content".getBytes());
+                MockMultipartFile file = new MockMultipartFile(
+                                "file",
+                                "video.mp4",
+                                "video/mp4",
+                                "fake-video-content".getBytes());
 
-        UploadVideoInput input = new UploadVideoInput(
-                "My Video",
-                file);
+                UploadVideoInput input = new UploadVideoInput(
+                                "My Video",
+                                VideoCategory.MUSIC,
+                                file);
 
-        UploadVideoOutput output = useCase.execute(input);
+                UploadVideoOutput output = useCase.execute(input);
 
-        Assertions.assertThat(output).isNotNull();
+                Assertions.assertThat(output).isNotNull();
 
-        Assertions.assertThat(output.title())
-                .isEqualTo("My Video");
+                Assertions.assertThat(output.title())
+                                .isEqualTo("My Video");
 
-        Assertions.assertThat(output.objectKey())
-                .contains("original.mp4");
+                Assertions.assertThat(output.objectKey())
+                                .contains("original.mp4");
 
-        Mockito.verify(storageService)
-                .upload(Mockito.anyString(), Mockito.eq(file));
+                Mockito.verify(storageService)
+                                .upload(Mockito.anyString(), Mockito.eq(file));
 
-        Mockito.verify(catalogRepository)
-                .save(Mockito.any(VideoContent.class));
+                Mockito.verify(catalogRepository)
+                                .save(Mockito.any(VideoContent.class));
 
-        Mockito.verify(eventPublisher)
-                .publish(Mockito.any(VideoUploadedEvent.class));
-    }
+                Mockito.verify(eventPublisher)
+                                .publish(Mockito.any(VideoUploadedEvent.class));
+        }
 }

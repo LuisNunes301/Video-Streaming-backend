@@ -21,7 +21,7 @@ import com.mininetflix.ministreaming.application.content.dto.UploadVideoInput;
 import com.mininetflix.ministreaming.application.content.dto.UploadVideoOutput;
 import com.mininetflix.ministreaming.application.content.port.VideoCatalogRepository;
 import com.mininetflix.ministreaming.application.content.usecase.UploadVideoUseCase;
-
+import com.mininetflix.ministreaming.domain.content.VideoCategory;
 import com.mininetflix.ministreaming.domain.content.VideoStatus;
 
 import com.mininetflix.ministreaming.web.controller.content.VideoUploadController;
@@ -50,8 +50,10 @@ class VideoUploadControllerIntegrationTest {
 
                 UploadVideoOutput output = new UploadVideoOutput(
                                 "123",
+
                                 "My Video",
                                 "123/original.mp4",
+                                VideoCategory.MUSIC,
                                 VideoStatus.PROCESSING);
 
                 when(uploadVideoUseCase.execute(any(UploadVideoInput.class)))

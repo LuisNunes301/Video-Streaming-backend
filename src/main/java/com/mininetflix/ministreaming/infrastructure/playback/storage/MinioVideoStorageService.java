@@ -34,7 +34,7 @@ public class MinioVideoStorageService implements VideoStorageService {
     }
 
     @Override
-    public String generatePresignedUrl(String objectKey) {
+    public String generatePublicUrl(String objectKey) {
 
         return publicHost
                 + "/videos/"

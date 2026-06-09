@@ -40,6 +40,7 @@ public class UploadVideoUseCaseImpl implements UploadVideoUseCase {
                 VideoContent video = VideoContent.create(
                                 id,
                                 input.title(),
+                                input.category(),
                                 objectKey);
 
                 catalogRepository.save(video);
@@ -52,6 +53,8 @@ public class UploadVideoUseCaseImpl implements UploadVideoUseCase {
                 return new UploadVideoOutput(
                                 video.getId(),
                                 video.getTitle(),
-                                video.getObjectKey(), video.getStatus());
+                                video.getObjectKey(),
+                                video.getCategory(),
+                                video.getStatus());
         }
 }

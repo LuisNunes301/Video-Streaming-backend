@@ -2,6 +2,7 @@ package com.mininetflix.ministreaming.infrastructure.content.entity;
 
 import java.time.Instant;
 
+import com.mininetflix.ministreaming.domain.content.VideoCategory;
 import com.mininetflix.ministreaming.domain.content.VideoStatus;
 
 import jakarta.persistence.Entity;
@@ -35,14 +36,15 @@ public class VideoEntity {
 
     @Enumerated(EnumType.STRING)
     private VideoStatus status;
-
+    @Enumerated(EnumType.STRING)
+    private VideoCategory category;
     private Double duration;
     private Long size;
     private Integer width;
     private Integer height;
 
-    private String thumbnailUrl;
-    private String hlsPlaylistUrl;
+    private String thumbnailKey;
+    private String hlsPlaylistKey;
 
     private String processingError;
 

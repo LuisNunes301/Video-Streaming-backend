@@ -6,7 +6,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 public interface VideoStorageService {
 
-    String generatePresignedUrl(String objectKey);
+    String generatePublicUrl(String objectKey);
 
     void upload(String objectKey, MultipartFile file);
 

@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.stereotype.Component;
 
 import com.mininetflix.ministreaming.application.content.port.VideoCatalogRepository;
+import com.mininetflix.ministreaming.domain.content.VideoCategory;
 import com.mininetflix.ministreaming.domain.content.VideoContent;
 import com.mininetflix.ministreaming.infrastructure.content.entity.VideoEntity;
 
@@ -29,8 +30,9 @@ public class JpaVideoCatalogRepository implements VideoCatalogRepository {
                                 .size(video.getSize())
                                 .height(video.getHeight())
                                 .width(video.getWidth())
-                                .thumbnailUrl(video.getThumbnailUrl())
-                                .hlsPlaylistUrl(video.getHlsPlaylistUrl())
+                                .category(video.getCategory())
+                                .thumbnailKey(video.getThumbnailKey())
+                                .hlsPlaylistKey(video.gethlsPlaylistKey())
                                 .processingError(video.getProcessingError())
                                 .createdAt(video.getCreatedAt())
                                 .processedAt(video.getProcessedAt())
@@ -64,10 +66,20 @@ public class JpaVideoCatalogRepository implements VideoCatalogRepository {
                                 entity.getSize(),
                                 entity.getWidth(),
                                 entity.getHeight(),
-                                entity.getThumbnailUrl(),
-                                entity.getHlsPlaylistUrl(),
+                                entity.getCategory(),
+                                entity.getThumbnailKey(),
+                                entity.getHlsPlaylistKey(),
                                 entity.getProcessingError(),
                                 entity.getCreatedAt(),
                                 entity.getProcessedAt());
         }
+
+        @Override
+        public List<VideoContent> findByCategory(VideoCategory category) {
+                return jpaRepository.findByCategory(category)
+                                .stream()
+                                .map(this::toDomain)
+                                .toList();
+        }
+
 }

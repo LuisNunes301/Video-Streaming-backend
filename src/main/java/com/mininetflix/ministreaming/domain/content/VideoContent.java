@@ -10,14 +10,14 @@ public class VideoContent {
     private String objectKey;
 
     private VideoStatus status;
-
+    private VideoCategory category;
     private Double duration;
     private Long size;
     private Integer width;
     private Integer height;
 
-    private String thumbnailUrl;
-    private String hlsPlaylistUrl;
+    private String thumbnailKey;
+    private String hlsPlaylistKey;
 
     private String processingError;
 
@@ -30,6 +30,7 @@ public class VideoContent {
     public static VideoContent create(
             String id,
             String title,
+            VideoCategory category,
             String objectKey) {
 
         VideoContent video = new VideoContent();
@@ -37,6 +38,7 @@ public class VideoContent {
         video.title = title;
         video.objectKey = objectKey;
         video.status = VideoStatus.UPLOADING;
+        video.category = category;
         video.createdAt = Instant.now();
 
         return video;
@@ -51,8 +53,9 @@ public class VideoContent {
             Long size,
             Integer width,
             Integer height,
-            String thumbnailUrl,
-            String hlsPlaylistUrl,
+            VideoCategory category,
+            String thumbnailKey,
+            String hlsPlaylistKey,
             String processingError,
             Instant createdAt,
             Instant processedAt) {
@@ -66,8 +69,9 @@ public class VideoContent {
         video.width = width;
         video.height = height;
         video.size = size;
-        video.thumbnailUrl = thumbnailUrl;
-        video.hlsPlaylistUrl = hlsPlaylistUrl;
+        video.thumbnailKey = thumbnailKey;
+        video.category = category;
+        video.hlsPlaylistKey = hlsPlaylistKey;
         video.processingError = processingError;
         video.createdAt = createdAt;
         video.processedAt = processedAt;
@@ -93,8 +97,8 @@ public class VideoContent {
             Long size,
             Integer width,
             Integer height,
-            String thumbnailUrl,
-            String hlsPlaylistUrl) {
+            String thumbnailKey,
+            String hlsPlaylistKey) {
 
         if (this.status != VideoStatus.PROCESSING) {
             throw new IllegalStateException(
@@ -105,8 +109,8 @@ public class VideoContent {
         this.size = size;
         this.width = width;
         this.height = height;
-        this.thumbnailUrl = thumbnailUrl;
-        this.hlsPlaylistUrl = hlsPlaylistUrl;
+        this.thumbnailKey = thumbnailKey;
+        this.hlsPlaylistKey = hlsPlaylistKey;
         this.processingError = null;
 
         this.status = VideoStatus.READY;
@@ -160,6 +164,10 @@ public class VideoContent {
         return size;
     }
 
+    public VideoCategory getCategory() {
+        return category;
+    }
+
     public Integer getWidth() {
         return width;
     }
@@ -168,12 +176,12 @@ public class VideoContent {
         return height;
     }
 
-    public String getThumbnailUrl() {
-        return thumbnailUrl;
+    public String getThumbnailKey() {
+        return thumbnailKey;
     }
 
-    public String getHlsPlaylistUrl() {
-        return hlsPlaylistUrl;
+    public String gethlsPlaylistKey() {
+        return hlsPlaylistKey;
     }
 
     public String getProcessingError() {
