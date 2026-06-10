@@ -14,7 +14,7 @@ import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
-public class JpaVideoCatalogRepository implements VideoCatalogRepository {
+public class JpaVideoCatalogAdapter implements VideoCatalogRepository {
 
         private final DataVideoJpaRepository jpaRepository;
 

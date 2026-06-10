@@ -6,57 +6,73 @@ Evoluir o backend atual para suportar uma experiência mobile semelhante a plata
 
 O backend já possui:
 
-- JWT Authentication
-- Registro e Login
-- Catálogo de vídeos
-- HLS Streaming
-- Continue Watching
-- PostgreSQL
-- RabbitMQ
-- MinIO
-- FFmpeg
-- Clean Architecture
-- DDD
-- Event-Driven Architecture
+* JWT Authentication
+* Registro e Login
+* Catálogo de vídeos
+* HLS Streaming
+* Continue Watching
+* PostgreSQL
+* RabbitMQ
+* MinIO
+* FFmpeg
+* Clean Architecture
+* DDD
+* Event-Driven Architecture
 
 O foco agora é fornecer recursos necessários para melhorar a experiência do aplicativo mobile.
 
 ---
 
-# Arquitetura de Usuário
+# Prioridade 1 - Thumbnail Pública ✅
 
-## Situação Atual
-
-Atualmente a entidade User possui:
-
-```java
-public class User {
-
-    private final UUID id;
-
-    private String name;
-    private String email;
-    private String passwordHash;
-
-    private final LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
-
-    private final Set<UserRole> roles;
-}
-```
-
-Essa entidade é responsável por:
-
-- autenticação
-- autorização
-- credenciais
-- permissões
+Implementado.
 
 ---
 
-## Nova Estratégia
+# Prioridade 2 - Categorias Fortes ✅
 
-Separar:
+Implementado.
+
+---
+
+# Prioridade 3 - Busca ✅
+
+Implementado.
+
+---
+
+# Prioridade 4 - Contas e Perfis
+
+## Objetivo
+
+Permitir que uma conta possua múltiplos perfis.
+
+Cada perfil mantém seus próprios:
+
+* favoritos
+* histórico
+* continue watching
+* estatísticas
+* avatar
+* preferências futuras
+
+Seguindo o padrão utilizado pelos principais serviços de streaming.
+
+---
+
+## Modelo
+
+```text
+Account
+ ├─ Luis
+ ├─ Filho
+ ├─ Kids
+ └─ Convidado
+```
+
+---
+
+## Arquitetura
 
 ### User
 
@@ -68,20 +84,23 @@ Senha
 JWT
 Roles
 Segurança
+Autenticação
 ```
 
 ---
 
-### UserProfile
+### Profile
 
 Responsável por:
 
 ```text
-Avatar
 Nickname
+Avatar
 Bio
+Histórico
+Favoritos
+Continue Watching
 Preferências
-Configurações futuras
 ```
 
 ---
@@ -89,7 +108,7 @@ Configurações futuras
 ## Nova Entidade de Domínio
 
 ```java
-public class UserProfile {
+public class Profile {
 
     private UUID id;
 
@@ -97,9 +116,11 @@ public class UserProfile {
 
     private String nickname;
 
-    private String avatarUrl;
+    private String avatarKey;
 
     private String bio;
+
+    private Boolean kidsProfile;
 
     private LocalDateTime createdAt;
 
@@ -114,9 +135,9 @@ public class UserProfile {
 ```text
 User
   |
-  | 1:1
+  | 1:N
   |
-UserProfile
+Profiles
 ```
 
 ---
@@ -124,16 +145,18 @@ UserProfile
 ## Banco
 
 ```sql
-CREATE TABLE user_profile (
+CREATE TABLE profiles (
     id UUID PRIMARY KEY,
 
-    user_id UUID UNIQUE NOT NULL,
+    user_id UUID NOT NULL,
 
-    nickname VARCHAR(100),
+    nickname VARCHAR(100) NOT NULL,
 
-    avatar_url TEXT,
+    avatar_key TEXT,
 
     bio TEXT,
+
+    kids_profile BOOLEAN DEFAULT FALSE,
 
     created_at TIMESTAMP,
 
@@ -147,284 +170,69 @@ CREATE TABLE user_profile (
 
 ---
 
-## Fluxo de Registro
+## Fluxo Inicial
 
-Ao criar usuário:
+Ao registrar uma conta:
 
 ```text
 Register User
         ↓
 Persist User
         ↓
-Create Default UserProfile
+Create Default Profile
         ↓
 nickname = user.name
-avatar = null
-bio = null
 ```
 
 ---
 
-## Benefícios
+## Endpoints
 
-Permite evoluir futuramente:
-
-```text
-Foto de perfil
-
-Preferências
-
-Tema
-
-Idioma
-
-Configurações do app
-
-Notificações
-
-Controle parental
-```
-
-Sem poluir a entidade User.
-
----
-
-# Prioridade 1 - Thumbnail Pública feito
-
-## Problema
-
-Hoje o catálogo retorna:
-
-```json
-{
-  "thumbnailUrl": "previews/video-id/thumbnail.jpg"
-}
-```
-
-O aplicativo mobile não consegue consumir diretamente essa informação.
-
----
-
-## Objetivo
-
-Retornar URL pública completa.
-
-Exemplo:
-
-```json
-{
-  "thumbnailUrl": "http://192.168.0.4/videos/previews/video-id/thumbnail.jpg"
-}
-```
-
----
-
-## Solução
-
-Durante o mapeamento para DTO:
-
-```java
-thumbnailUrl =
-    publicBaseUrl
-    + "/videos/"
-    + thumbnailPath;
-```
-
----
-
-## Resultado
-
-Frontend:
-
-```tsx
-<Image source={{ uri: video.thumbnailUrl }} />
-```
-
-Sem chamadas adicionais.
-
----
-
-# Prioridade 2 - Categorias Fortes feito
-
-## Problema
-
-Usar String livre para categoria gera erros:
-
-```text
-Music
-music
-MUSIC
-Musica
-Musics
-```
-
-Além de permitir uploads incorretos.
-
----
-
-## Solução
-
-Criar enum de domínio.
-
----
-
-## Enum
-
-```java
-public enum VideoCategory {
-
-    MUSIC,
-
-    DOCUMENTARY,
-
-    TECHNOLOGY,
-
-    ACTION,
-
-    EDUCATION,
-
-    ENTERTAINMENT
-}
-```
-
----
-
-## Entidade
-
-```java
-private VideoCategory category;
-```
-
----
-
-## Banco
-
-```sql
-ALTER TABLE videos
-ADD COLUMN category VARCHAR(50);
-```
-
----
-
-## DTO
-
-```json
-{
-  "title": "Beat It",
-  "category": "MUSIC"
-}
-```
-
----
-
-## Upload
-
-O frontend sempre envia:
-
-```json
-{
-  "title": "Beat It",
-  "category": "MUSIC"
-}
-```
-
----
-
-## Benefícios
-
-Impede:
-
-```text
-Typos
-Categorias inválidas
-Dados inconsistentes
-```
-
----
-
-## Evolução Futura
-
-Criar tabela:
-
-```sql
-video_categories
-```
-
-caso o catálogo cresça muito.
-
----
-
-# Prioridade 3 - Busca
-
-## Endpoint
+### Criar perfil
 
 ```http
-GET /api/videos/search?q=beat
+POST /api/profiles
+```
+
+Request:
+
+```json
+{
+  "nickname": "Luis"
+}
 ```
 
 ---
 
-## Caso de Uso
+### Listar perfis
 
-```java
-SearchVideosUseCase
+```http
+GET /api/profiles
 ```
 
----
-
-## Repository Port
-
-```java
-List<VideoContent> searchByTitle(String query);
-```
-
----
-
-## Exemplo
+Response:
 
 ```json
 [
   {
-    "id": "...",
-    "title": "Beat It"
+    "id": "1",
+    "nickname": "Luis",
+    "avatarUrl": "..."
+  },
+  {
+    "id": "2",
+    "nickname": "Kids",
+    "avatarUrl": "..."
   }
 ]
 ```
 
 ---
 
-## Resultado
-
-Tela:
-
-```text
-🔍 Buscar
-
-Beat
-```
-
-retornando resultados em tempo real.
-
----
-
-# Prioridade 4 - Perfil do Usuário
-
-## Objetivo
-
-Permitir personalização da conta.
-
-Sem múltiplos perfis.
-
-Um perfil por usuário.
-
----
-
-## Endpoints
-
 ### Buscar perfil
 
 ```http
-GET /api/profile/me
+GET /api/profiles/{profileId}
 ```
 
 ---
@@ -432,30 +240,45 @@ GET /api/profile/me
 ### Atualizar perfil
 
 ```http
-PUT /api/profile
+PUT /api/profiles/{profileId}
 ```
 
----
-
-## Request
+Request:
 
 ```json
 {
-  "nickname": "Luis",
-  "avatarUrl": "https://...",
+  "nickname": "Luis Nunes",
   "bio": "Backend Developer"
 }
 ```
 
 ---
 
-## Response
+### Remover perfil
+
+```http
+DELETE /api/profiles/{profileId}
+```
+
+---
+
+## Upload de Avatar
+
+```http
+POST /api/profiles/{profileId}/avatar
+```
+
+Request:
+
+```multipart/form-data
+file
+```
+
+Response:
 
 ```json
 {
-  "nickname": "Luis",
-  "avatarUrl": "https://...",
-  "bio": "Backend Developer"
+  "avatarUrl": "http://..."
 }
 ```
 
@@ -463,12 +286,17 @@ PUT /api/profile
 
 ## Resultado
 
-Tela:
-
 ```text
+Conta:
+luis@email.com
+
+Perfis:
+
 👤 Luis
 
-Backend Developer
+👤 Filho
+
+👤 Kids
 ```
 
 ---
@@ -477,14 +305,14 @@ Backend Developer
 
 ## Objetivo
 
-Exibir métricas pessoais.
+Exibir métricas por perfil.
 
 ---
 
 ## Endpoint
 
 ```http
-GET /api/users/stats
+GET /api/profiles/{profileId}/stats
 ```
 
 ---
@@ -503,35 +331,23 @@ GET /api/users/stats
 
 ## Fonte
 
-Tabela:
-
 ```text
-playback
+Playback
 ```
 
----
-
-## Resultado
-
-```text
-42 vídeos assistidos
-
-18 horas consumidas
-
-10 vídeos concluídos
-```
+relacionado ao Profile.
 
 ---
 
 # Prioridade 6 - Favoritos
 
-## Nova Tabela
+## Banco
 
 ```sql
-CREATE TABLE favorites (
+CREATE TABLE profile_favorites (
     id UUID PRIMARY KEY,
 
-    user_id UUID NOT NULL,
+    profile_id UUID NOT NULL,
 
     video_id UUID NOT NULL,
 
@@ -543,33 +359,31 @@ CREATE TABLE favorites (
 
 ## Endpoints
 
-### Adicionar
+### Adicionar favorito
 
 ```http
-POST /api/favorites/{videoId}
+POST /api/profiles/{profileId}/favorites/{videoId}
 ```
 
 ---
 
-### Remover
+### Remover favorito
 
 ```http
-DELETE /api/favorites/{videoId}
+DELETE /api/profiles/{profileId}/favorites/{videoId}
 ```
 
 ---
 
-### Listar
+### Listar favoritos
 
 ```http
-GET /api/favorites
+GET /api/profiles/{profileId}/favorites
 ```
 
 ---
 
 ## Resultado
-
-Nova aba:
 
 ```text
 ⭐ Favoritos
@@ -598,7 +412,7 @@ Histórico Completo
 ## Endpoint
 
 ```http
-GET /api/history
+GET /api/profiles/{profileId}/history
 ```
 
 ---
@@ -617,24 +431,18 @@ GET /api/history
 
 ---
 
-## Fonte
-
-Tabela playback.
-
----
-
 # Prioridade 8 - Homepage Inteligente
 
 ## Objetivo
 
-Evitar múltiplas chamadas do frontend.
+Retornar toda a Home em uma única chamada.
 
 ---
 
 ## Endpoint
 
 ```http
-GET /api/home
+GET /api/home?profileId={profileId}
 ```
 
 ---
@@ -650,32 +458,8 @@ GET /api/home
   "action": [],
   "education": [],
   "entertainment": [],
+  "sports": [],
   "trending": []
-}
-```
-
----
-
-## Exemplo de Construção
-
-```java
-HomeResponse {
-
-    List<VideoCard> continueWatching;
-
-    List<VideoCard> music;
-
-    List<VideoCard> technology;
-
-    List<VideoCard> documentary;
-
-    List<VideoCard> action;
-
-    List<VideoCard> education;
-
-    List<VideoCard> entertainment;
-
-    List<VideoCard> trending;
 }
 ```
 
@@ -695,24 +479,12 @@ calculado pelo playback.
 
 ## Benefícios
 
-Evita:
+Evita dezenas de chamadas do frontend.
 
-```text
-GET /videos
+Tudo chega através de:
 
-GET /continue
-
-GET /videos/category/music
-
-GET /videos/category/documentary
-
-GET /videos/category/action
-```
-
-Tudo em:
-
-```text
-GET /home
+```http
+GET /api/home
 ```
 
 ---
@@ -731,7 +503,7 @@ PlaybackState
 
 ## Problema
 
-O frontend precisa buscar vídeo por vídeo.
+O frontend precisa buscar os vídeos individualmente.
 
 ---
 
@@ -753,7 +525,7 @@ O frontend precisa buscar vídeo por vídeo.
 
 ## Benefício
 
-Renderização direta da faixa:
+Renderização imediata da seção:
 
 ```text
 Continuar Assistindo
@@ -761,78 +533,71 @@ Continuar Assistindo
 
 ---
 
-# Prioridade 10 - Upload de Avatar
+# Prioridade 10 - Avatar via MinIO
 
-## Endpoint
+## Objetivo
 
-```http
-POST /api/profile/avatar
-```
-
----
-
-## Request
-
-```multipart/form-data
-file
-```
+Permitir avatar customizado para cada perfil.
 
 ---
 
 ## Fluxo
 
 ```text
-Upload
-      ↓
+Upload Avatar
+       ↓
 MinIO
-      ↓
-Salvar URL
-      ↓
-Atualizar UserProfile
+       ↓
+Salvar avatarKey
+       ↓
+Gerar URL Pública
+       ↓
+Atualizar Profile
 ```
 
 ---
 
-## Response
+## Estrutura no Bucket
 
-```json
-{
-  "avatarUrl": "http://..."
-}
+```text
+profiles/
+ └─ profile-id/
+     └─ avatar.jpg
 ```
 
 ---
 
 # Ordem Recomendada
 
-## Sprint 1
+## Sprint 1 ✅
 
-- Thumbnail pública feito
-- Categorias fortes (enum)
-- Busca
+* Thumbnail Pública
+* Categorias Fortes
+* Busca
 
 ---
 
 ## Sprint 2
 
-- UserProfile
-- Avatar
-- Perfil
+* Perfis
+* Upload Avatar
+* Gestão de Perfis
 
 ---
 
 ## Sprint 3
 
-- Estatísticas
-- Favoritos
-- Histórico
+* Estatísticas
+* Favoritos
+* Histórico
 
 ---
 
 ## Sprint 4
 
-- Continue Watching melhorado
-- Home agregada
+* Continue Watching Melhorado
+* Home Agregada
+* Trending
 
 ---
 
@@ -840,30 +605,28 @@ Atualizar UserProfile
 
 Backend capaz de suportar:
 
-- Home estilo Netflix
-- Continue Watching
-- Busca
-- Perfil customizado
-- Avatar
-- Favoritos
-- Histórico
-- Estatísticas pessoais
-- Streaming HLS
-- Resume Playback
-- Categorias fortes
-- Home agregada
-- Trending
+* Home estilo Netflix
+* Múltiplos perfis
+* Continue Watching
+* Busca
+* Avatar
+* Favoritos
+* Histórico
+* Estatísticas
+* Trending
+* Streaming HLS
+* Resume Playback
+* Categorias fortes
+* Home agregada
 
-Mantendo a arquitetura baseada em:
+Mantendo:
 
-- Clean Architecture
-- DDD
-- Event-Driven Architecture
-- RabbitMQ
-- PostgreSQL
-- MinIO
-- Spring Boot
-- FFmpeg
-- Docker
-
----
+* Clean Architecture
+* DDD
+* Event-Driven Architecture
+* RabbitMQ
+* PostgreSQL
+* MinIO
+* Spring Boot
+* FFmpeg
+* Docker

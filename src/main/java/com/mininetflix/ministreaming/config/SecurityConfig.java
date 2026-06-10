@@ -39,6 +39,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/login", "/auth/register").permitAll()
                         .requestMatchers("/videos/**").authenticated()
+                        .requestMatchers("/profiles/**").authenticated()
                         .requestMatchers("/playback/**").authenticated()
                         .requestMatchers(
                                 "/v3/api-docs/**",

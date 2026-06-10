@@ -6,8 +6,10 @@ import org.springframework.context.annotation.Configuration;
 
 import com.mininetflix.ministreaming.application.user.port.PasswordEncoder;
 import com.mininetflix.ministreaming.application.user.port.UserRepository;
+import com.mininetflix.ministreaming.application.userprofile.port.UserProfileRepository;
 import com.mininetflix.ministreaming.domain.user.User;
 import com.mininetflix.ministreaming.domain.user.UserRole;
+import com.mininetflix.ministreaming.domain.userprofile.UserProfile;
 
 @Configuration
 public class AdminMockConfig {
@@ -15,6 +17,7 @@ public class AdminMockConfig {
     @Bean
     public CommandLineRunner createAdminUser(
             UserRepository userRepository,
+            UserProfileRepository profileRepository,
             PasswordEncoder passwordEncoder) {
 
         return args -> {
@@ -32,7 +35,13 @@ public class AdminMockConfig {
 
             admin.addRole(UserRole.ADMIN);
 
-            userRepository.save(admin);
+            User savedAdmin = userRepository.save(admin);
+
+            UserProfile profile = UserProfile.create(
+                    savedAdmin.getId(),
+                    savedAdmin.getName());
+
+            profileRepository.save(profile);
 
             System.out.println("ADMIN criado com sucesso!");
         };

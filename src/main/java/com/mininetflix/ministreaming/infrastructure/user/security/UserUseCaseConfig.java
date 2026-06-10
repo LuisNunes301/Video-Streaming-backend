@@ -10,6 +10,7 @@ import com.mininetflix.ministreaming.application.user.usecase.AuthenticateUserUs
 import com.mininetflix.ministreaming.application.user.usecase.AuthenticateUserUseCaseImpl;
 import com.mininetflix.ministreaming.application.user.usecase.RegisterUserUseCase;
 import com.mininetflix.ministreaming.application.user.usecase.RegisterUserUseCaseImpl;
+import com.mininetflix.ministreaming.application.userprofile.port.UserProfileRepository;
 
 @Configuration
 public class UserUseCaseConfig {
@@ -28,9 +29,12 @@ public class UserUseCaseConfig {
     @Bean
     public RegisterUserUseCase registerUserUseCase(
             UserRepository userRepository,
+            UserProfileRepository userProfileRepository,
             PasswordEncoder passwordEncoder) {
+
         return new RegisterUserUseCaseImpl(
                 userRepository,
+                userProfileRepository,
                 passwordEncoder);
     }
 }

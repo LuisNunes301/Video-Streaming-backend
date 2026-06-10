@@ -28,7 +28,6 @@ import com.mininetflix.ministreaming.domain.content.VideoContent;
 @RequestMapping("/videos")
 public class VideoUploadController {
 
-        private final SearchVideosUseCaseImpl searchVideosUseCaseImpl;
         private final UploadVideoUseCase uploadVideoUseCase;
         private final VideoCatalogRepository catalogRepository;
         private final ListVideosUseCase listVideoUseCase;
@@ -46,7 +45,6 @@ public class VideoUploadController {
                 this.listVideoUseCase = listVideoUseCase;
                 this.listVideosByCategoryUseCase = listVideosByCategoryUseCase;
                 this.searchVideosUseCase = searchVideosUseCase;
-                this.searchVideosUseCaseImpl = searchVideosUseCaseImpl;
         }
 
         @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

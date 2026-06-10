@@ -6,21 +6,27 @@ import org.springframework.transaction.annotation.Transactional;
 import com.mininetflix.ministreaming.application.user.dto.RegisterUserInput;
 import com.mininetflix.ministreaming.application.user.port.PasswordEncoder;
 import com.mininetflix.ministreaming.application.user.port.UserRepository;
+import com.mininetflix.ministreaming.application.userprofile.port.UserProfileRepository;
 import com.mininetflix.ministreaming.domain.user.User;
 import com.mininetflix.ministreaming.domain.user.exception.EmailAlreadyExistsException;
 import com.mininetflix.ministreaming.domain.user.exception.NameAlreadyExistsExecption;
+import com.mininetflix.ministreaming.domain.userprofile.UserProfile;
 
 @Service
 public class RegisterUserUseCaseImpl
         implements RegisterUserUseCase {
 
     private final UserRepository userRepository;
+    private final UserProfileRepository userProfileRepository;
     private final PasswordEncoder passwordEncoder;
 
     public RegisterUserUseCaseImpl(
             UserRepository userRepository,
+            UserProfileRepository userProfileRepository,
             PasswordEncoder passwordEncoder) {
+
         this.userRepository = userRepository;
+        this.userProfileRepository = userProfileRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -41,6 +47,11 @@ public class RegisterUserUseCaseImpl
                 input.email(),
                 passwordEncoder.encode(input.password()));
 
-        userRepository.save(user);
+        User savedUser = userRepository.save(user);
+        UserProfile profile = UserProfile.create(
+                savedUser.getId(),
+                savedUser.getName());
+
+        userProfileRepository.save(profile);
     }
 }

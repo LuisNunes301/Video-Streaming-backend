@@ -13,11 +13,11 @@ import com.mininetflix.ministreaming.domain.playback.PlaybackState;
 import com.mininetflix.ministreaming.infrastructure.playback.entity.PlaybackEntity;
 
 @Repository
-public class PlaybackRepositoryImpl implements PlaybackRepository {
+public class PlaybackRepositoryAdapter implements PlaybackRepository {
 
         private final PlaybackJpaRepository jpaRepository;
 
-        public PlaybackRepositoryImpl(PlaybackJpaRepository jpaRepository) {
+        public PlaybackRepositoryAdapter(PlaybackJpaRepository jpaRepository) {
                 this.jpaRepository = jpaRepository;
         }
 
