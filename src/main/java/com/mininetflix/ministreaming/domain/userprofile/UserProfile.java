@@ -53,8 +53,12 @@ public class UserProfile {
             String nickname,
             String bio) {
 
-        this.nickname = nickname;
+        if (nickname != null && !nickname.isBlank()) {
+            this.nickname = nickname;
+        }
+
         this.bio = bio;
+
         this.updatedAt = LocalDateTime.now();
     }
 

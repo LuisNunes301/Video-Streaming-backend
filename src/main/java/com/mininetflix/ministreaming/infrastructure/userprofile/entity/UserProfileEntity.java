@@ -8,7 +8,6 @@ import com.mininetflix.ministreaming.domain.userprofile.UserProfile;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Table;
 
 @Entity
@@ -18,7 +17,7 @@ public class UserProfileEntity {
     @Id
     private UUID id;
 
-    @JoinColumn(name = "user_id", nullable = false, unique = true)
+    @Column(name = "user_id", nullable = false, unique = true)
     private UUID userId;
 
     @Column(nullable = false)

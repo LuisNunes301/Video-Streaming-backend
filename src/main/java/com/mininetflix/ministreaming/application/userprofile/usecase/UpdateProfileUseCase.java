@@ -1,11 +1,13 @@
 package com.mininetflix.ministreaming.application.userprofile.usecase;
 
-import com.mininetflix.ministreaming.application.userprofile.dto.UpdateProfileOutput;
+import java.util.UUID;
+
 import com.mininetflix.ministreaming.application.userprofile.dto.UpdateProfileRequest;
+import com.mininetflix.ministreaming.web.controller.profile.dto.UserProfileResponse;
 
 public interface UpdateProfileUseCase {
 
-    UpdateProfileOutput execute(
-            String userId,
+    UserProfileResponse execute(
+            UUID userId,
             UpdateProfileRequest request);
 }

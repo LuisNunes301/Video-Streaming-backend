@@ -9,6 +9,7 @@ import com.mininetflix.ministreaming.application.userprofile.dto.UpdateProfileOu
 import com.mininetflix.ministreaming.application.userprofile.dto.UpdateProfileRequest;
 import com.mininetflix.ministreaming.application.userprofile.port.UserProfileRepository;
 import com.mininetflix.ministreaming.domain.userprofile.UserProfile;
+import com.mininetflix.ministreaming.web.controller.profile.dto.UserProfileResponse;
 
 import lombok.RequiredArgsConstructor;
 
@@ -17,34 +18,27 @@ import lombok.RequiredArgsConstructor;
 public class UpdateProfileUseCaseImpl
                 implements UpdateProfileUseCase {
 
-        private final UserProfileRepository profileRepository;
-        private final VideoStorageService storageService;
+        private final UserProfileRepository repository;
 
         @Override
-        public UpdateProfileOutput execute(
-                        String userId,
+        public UserProfileResponse execute(
+                        UUID userId,
                         UpdateProfileRequest request) {
 
-                UUID id = UUID.fromString(userId);
-
-                UserProfile profile = profileRepository
-                                .findByUserId(id)
+                UserProfile profile = repository
+                                .findByUserId(userId)
                                 .orElseThrow(() -> new RuntimeException("Profile not found"));
 
                 profile.updateProfile(
                                 request.nickname(),
                                 request.bio());
 
-                profileRepository.save(profile);
+                UserProfile saved = repository.save(profile);
 
-                String avatarUrl = profile.getAvatarKey() == null
-                                ? null
-                                : storageService.generatePublicUrl(
-                                                profile.getAvatarKey());
-
-                return new UpdateProfileOutput(
-                                profile.getNickname(),
-                                avatarUrl,
-                                profile.getBio());
+                return new UserProfileResponse(
+                                saved.getUserId(),
+                                saved.getNickname(),
+                                saved.getAvatarKey(),
+                                saved.getBio());
         }
 }

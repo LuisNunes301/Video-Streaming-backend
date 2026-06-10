@@ -1,5 +1,7 @@
 package com.mininetflix.ministreaming.web.controller.profile;
 
+import java.util.UUID;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,29 +23,31 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class UserProfileController {
 
-    private final GetUserProfileUseCase getUserProfileUseCase;
-    private final UpdateProfileUseCase updateProfileUseCase;
+        private final GetUserProfileUseCase getUserProfileUseCase;
+        private final UpdateProfileUseCase updateProfileUseCase;
 
-    @GetMapping("/me")
-    public ResponseEntity<UserProfileResponse> me(
-            Authentication authentication) {
+        @GetMapping("/me")
+        public ResponseEntity<UserProfileResponse> me(
+                        Authentication authentication) {
 
-        UserProfileResponse response = getUserProfileUseCase.execute(
-                authentication.getName());
+                UserProfileResponse response = getUserProfileUseCase.execute(
+                                authentication.getName());
 
-        return ResponseEntity.ok(response);
-    }
+                return ResponseEntity.ok(response);
+        }
 
-    @PutMapping
-    public ResponseEntity<UpdateProfileOutput> update(
-            Authentication authentication,
-            @RequestBody UpdateProfileRequest request) {
+        @PutMapping
+        public ResponseEntity<UserProfileResponse> update(
+                        Authentication authentication,
+                        @RequestBody UpdateProfileRequest request) {
 
-        String userId = authentication.getName();
+                UUID userId = UUID.fromString(
+                                authentication.getName());
 
-        return ResponseEntity.ok(
-                updateProfileUseCase.execute(
-                        userId,
-                        request));
-    }
+                UserProfileResponse response = updateProfileUseCase.execute(
+                                userId,
+                                request);
+
+                return ResponseEntity.ok(response);
+        }
 }
