@@ -10,6 +10,9 @@ import org.springframework.stereotype.Component;
 import com.mininetflix.ministreaming.application.content.dto.PreviewResult;
 import com.mininetflix.ministreaming.application.content.port.VideoPreviewGenerator;
 import com.mininetflix.ministreaming.application.content.port.VideoStorageService;
+import com.mininetflix.ministreaming.application.storage.StorageBucketEnum;
+import com.mininetflix.ministreaming.application.storage.StorageService;
+import com.mininetflix.ministreaming.infrastructure.storage.ThumbnailStorageService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -17,12 +20,13 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class FFmpegPreviewGenerator implements VideoPreviewGenerator {
 
-    private final VideoStorageService storageService;
+    private final VideoStorageService videoStorageService;
+    private final ThumbnailStorageService thumbnailStorageService;
 
     @Override
     public PreviewResult generate(String videoId, String objectKey) {
 
-        File video = storageService.download(objectKey);
+        File video = videoStorageService.download(objectKey);
 
         File tempDir = new File(System.getProperty("java.io.tmpdir"), "preview-" + videoId);
         tempDir.mkdirs();
@@ -74,9 +78,17 @@ public class FFmpegPreviewGenerator implements VideoPreviewGenerator {
             String spriteKey = basePath + "/sprite.jpg";
             String vttKey = basePath + "/preview.vtt";
 
-            storageService.uploadFile(thumbnailKey, thumbnail);
-            storageService.uploadFile(spriteKey, sprite);
-            storageService.uploadFile(vttKey, vtt);
+            thumbnailStorageService.upload(
+                    thumbnailKey,
+                    thumbnail);
+
+            thumbnailStorageService.upload(
+                    spriteKey,
+                    sprite);
+
+            thumbnailStorageService.upload(
+                    vttKey,
+                    vtt);
 
             return new PreviewResult(thumbnailKey, spriteKey, vttKey);
 

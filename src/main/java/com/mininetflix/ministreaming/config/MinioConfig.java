@@ -1,8 +1,9 @@
-package com.mininetflix.ministreaming.infrastructure.playback.storage;
+package com.mininetflix.ministreaming.config;
 
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Bean;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
 import io.minio.MinioClient;
 
 @Configuration
