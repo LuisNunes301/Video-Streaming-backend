@@ -2,24 +2,20 @@
 
 ## Objetivo
 
-Evoluir o backend atual para suportar uma experiência mobile semelhante a plataformas modernas de streaming como Netflix, Prime Video e Disney+.
+Evoluir o backend atual para suportar uma experiência mobile semelhante a plataformas modernas de streaming.
 
-O backend já possui:
+Arquitetura base já existente:
 
-* JWT Authentication
-* Registro e Login
-* Catálogo de vídeos
-* HLS Streaming
-* Continue Watching
+* Java 17
+* Spring Boot
 * PostgreSQL
 * RabbitMQ
 * MinIO
 * FFmpeg
+* JWT Authentication
 * Clean Architecture
 * DDD
 * Event-Driven Architecture
-
-O foco agora é fornecer recursos necessários para melhorar a experiência do aplicativo mobile.
 
 ---
 
@@ -27,11 +23,37 @@ O foco agora é fornecer recursos necessários para melhorar a experiência do a
 
 Implementado.
 
+Objetivo:
+
+* Exibir thumbnails sem autenticação.
+* Permitir carregamento rápido da home.
+
 ---
 
 # Prioridade 2 - Categorias Fortes ✅
 
 Implementado.
+
+Exemplo:
+
+```java
+public enum VideoCategory {
+    MUSIC,
+    TECHNOLOGY,
+    EDUCATION,
+    SPORTS,
+    DOCUMENTARY,
+    ENTERTAINMENT,
+    ACTION
+}
+```
+
+Benefícios:
+
+* Home organizada
+* Busca por categoria
+* Trending por categoria
+* Recomendações futuras
 
 ---
 
@@ -39,42 +61,29 @@ Implementado.
 
 Implementado.
 
+Endpoints:
+
+```http
+GET /videos/search?q=java
+```
+
+Benefícios:
+
+* Busca textual
+* Busca por categoria
+* Base para descoberta de conteúdo
+
 ---
 
-# Prioridade 4 - Contas e Perfis
+# Prioridade 4 - Contas e Perfis ✅
 
 ## Objetivo
 
-Permitir que uma conta possua múltiplos perfis.
-
-Cada perfil mantém seus próprios:
-
-* favoritos
-* histórico
-* continue watching
-* estatísticas
-* avatar
-* preferências futuras
-
-Seguindo o padrão utilizado pelos principais serviços de streaming.
+Separar autenticação de personalização.
 
 ---
 
-## Modelo
-
-```text
-Account
- ├─ Luis
- ├─ Filho
- ├─ Kids
- └─ Convidado
-```
-
----
-
-## Arquitetura
-
-### User
+## User
 
 Responsável por:
 
@@ -89,7 +98,7 @@ Autenticação
 
 ---
 
-### Profile
+## UserProfile
 
 Responsável por:
 
@@ -101,14 +110,43 @@ Histórico
 Favoritos
 Continue Watching
 Preferências
+Controle Parental
 ```
 
 ---
 
-## Nova Entidade de Domínio
+## Relacionamento
+
+```text
+User
+ |
+ | 1:N
+ |
+UserProfile
+```
+
+---
+
+## Modelo
+
+```text
+Conta:
+
+Luis@email.com
+
+Perfis:
+
+👤 Luis
+👤 Filho
+👤 Kids
+```
+
+---
+
+## Entidade
 
 ```java
-public class Profile {
+public class UserProfile {
 
     private UUID id;
 
@@ -130,49 +168,7 @@ public class Profile {
 
 ---
 
-## Relacionamento
-
-```text
-User
-  |
-  | 1:N
-  |
-Profiles
-```
-
----
-
-## Banco
-
-```sql
-CREATE TABLE profiles (
-    id UUID PRIMARY KEY,
-
-    user_id UUID NOT NULL,
-
-    nickname VARCHAR(100) NOT NULL,
-
-    avatar_key TEXT,
-
-    bio TEXT,
-
-    kids_profile BOOLEAN DEFAULT FALSE,
-
-    created_at TIMESTAMP,
-
-    updated_at TIMESTAMP,
-
-    CONSTRAINT fk_profile_user
-        FOREIGN KEY (user_id)
-        REFERENCES users(id)
-);
-```
-
----
-
-## Fluxo Inicial
-
-Ao registrar uma conta:
+## Fluxo de Registro
 
 ```text
 Register User
@@ -188,120 +184,88 @@ nickname = user.name
 
 ## Endpoints
 
-### Criar perfil
+### Criar Perfil
 
 ```http
-POST /api/profiles
+POST /profiles
 ```
 
-Request:
+### Listar Perfis
 
-```json
-{
-  "nickname": "Luis"
-}
+```http
+GET /profiles
+```
+
+### Buscar Perfil
+
+```http
+GET /profiles/{profileId}
+```
+
+### Atualizar Perfil
+
+```http
+PUT /profiles/{profileId}
+```
+
+### Remover Perfil
+
+```http
+DELETE /profiles/{profileId}
 ```
 
 ---
 
-### Listar perfis
+# Prioridade 5 - Avatar via MinIO
 
-```http
-GET /api/profiles
-```
+## Objetivo
 
-Response:
-
-```json
-[
-  {
-    "id": "1",
-    "nickname": "Luis",
-    "avatarUrl": "..."
-  },
-  {
-    "id": "2",
-    "nickname": "Kids",
-    "avatarUrl": "..."
-  }
-]
-```
+Permitir avatar customizado para cada perfil.
 
 ---
 
-### Buscar perfil
+## Endpoint
 
 ```http
-GET /api/profiles/{profileId}
+POST /profiles/{profileId}/avatar
 ```
 
----
+multipart/form-data
 
-### Atualizar perfil
-
-```http
-PUT /api/profiles/{profileId}
-```
-
-Request:
-
-```json
-{
-  "nickname": "Luis Nunes",
-  "bio": "Backend Developer"
-}
-```
-
----
-
-### Remover perfil
-
-```http
-DELETE /api/profiles/{profileId}
-```
-
----
-
-## Upload de Avatar
-
-```http
-POST /api/profiles/{profileId}/avatar
-```
-
-Request:
-
-```multipart/form-data
+```text
 file
 ```
 
-Response:
-
-```json
-{
-  "avatarUrl": "http://..."
-}
-```
-
 ---
 
-## Resultado
+## Estrutura
 
 ```text
-Conta:
-luis@email.com
+avatars/
 
-Perfis:
-
-👤 Luis
-
-👤 Filho
-
-👤 Kids
+profile-id/
+ └── avatar.jpg
 ```
 
 ---
 
-# Prioridade 5 - Estatísticas de Consumo
+## Fluxo
+
+```text
+Upload
+    ↓
+MinIO
+    ↓
+Salvar avatarKey
+    ↓
+Gerar URL Pública
+    ↓
+Atualizar Perfil
+```
+
+---
+
+# Prioridade 6 - Estatísticas de Consumo
 
 ## Objetivo
 
@@ -309,10 +273,16 @@ Exibir métricas por perfil.
 
 ---
 
+## Fonte
+
+Playback
+
+---
+
 ## Endpoint
 
 ```http
-GET /api/profiles/{profileId}/stats
+GET /profiles/{profileId}/stats
 ```
 
 ---
@@ -329,17 +299,19 @@ GET /api/profiles/{profileId}/stats
 
 ---
 
-## Fonte
+## Dados Derivados
+
+Playback:
 
 ```text
-Playback
+currentTime
+completed
+lastUpdated
 ```
-
-relacionado ao Profile.
 
 ---
 
-# Prioridade 6 - Favoritos
+# Prioridade 7 - Favoritos
 
 ## Banco
 
@@ -359,60 +331,44 @@ CREATE TABLE profile_favorites (
 
 ## Endpoints
 
-### Adicionar favorito
+### Adicionar Favorito
 
 ```http
-POST /api/profiles/{profileId}/favorites/{videoId}
+POST /profiles/{profileId}/favorites/{videoId}
 ```
 
----
-
-### Remover favorito
+### Remover Favorito
 
 ```http
-DELETE /api/profiles/{profileId}/favorites/{videoId}
+DELETE /profiles/{profileId}/favorites/{videoId}
 ```
 
----
-
-### Listar favoritos
+### Listar Favoritos
 
 ```http
-GET /api/profiles/{profileId}/favorites
+GET /profiles/{profileId}/favorites
 ```
 
 ---
 
-## Resultado
-
-```text
-⭐ Favoritos
-```
-
----
-
-# Prioridade 7 - Histórico
+# Prioridade 8 - Histórico
 
 ## Objetivo
 
-Separar:
+Separar Histórico Completo de Continue Watching.
 
-```text
-Continue Watching
-```
+---
 
-de
+## Fonte
 
-```text
-Histórico Completo
-```
+Playback
 
 ---
 
 ## Endpoint
 
 ```http
-GET /api/profiles/{profileId}/history
+GET /profiles/{profileId}/history
 ```
 
 ---
@@ -423,7 +379,8 @@ GET /api/profiles/{profileId}/history
 [
   {
     "videoId": "...",
-    "title": "Beat It",
+    "title": "...",
+    "thumbnailUrl": "...",
     "watchedAt": "2026-06-04"
   }
 ]
@@ -431,67 +388,9 @@ GET /api/profiles/{profileId}/history
 
 ---
 
-# Prioridade 8 - Homepage Inteligente
-
-## Objetivo
-
-Retornar toda a Home em uma única chamada.
-
----
-
-## Endpoint
-
-```http
-GET /api/home?profileId={profileId}
-```
-
----
-
-## Response
-
-```json
-{
-  "continueWatching": [],
-  "music": [],
-  "technology": [],
-  "documentary": [],
-  "action": [],
-  "education": [],
-  "entertainment": [],
-  "sports": [],
-  "trending": []
-}
-```
-
----
-
-## Trending
-
-Inicialmente:
-
-```text
-Mais assistidos
-```
-
-calculado pelo playback.
-
----
-
-## Benefícios
-
-Evita dezenas de chamadas do frontend.
-
-Tudo chega através de:
-
-```http
-GET /api/home
-```
-
----
-
 # Prioridade 9 - Continue Watching Melhorado
 
-## Hoje
+## Situação Atual
 
 Retorna:
 
@@ -503,7 +402,7 @@ PlaybackState
 
 ## Problema
 
-O frontend precisa buscar os vídeos individualmente.
+Frontend precisa buscar dados do vídeo separadamente.
 
 ---
 
@@ -513,7 +412,7 @@ O frontend precisa buscar os vídeos individualmente.
 [
   {
     "videoId": "...",
-    "title": "Beat It",
+    "title": "...",
     "thumbnailUrl": "...",
     "progressSeconds": 150,
     "duration": 372
@@ -523,46 +422,185 @@ O frontend precisa buscar os vídeos individualmente.
 
 ---
 
-## Benefício
+## Benefícios
 
-Renderização imediata da seção:
+Renderização imediata.
 
-```text
-Continuar Assistindo
-```
+Menos chamadas HTTP.
 
 ---
 
-# Prioridade 10 - Avatar via MinIO
+# Prioridade 10 - Home Agregada
 
 ## Objetivo
 
-Permitir avatar customizado para cada perfil.
+Retornar toda a Home em uma única chamada.
 
 ---
 
-## Fluxo
+## Endpoint
 
-```text
-Upload Avatar
-       ↓
-MinIO
-       ↓
-Salvar avatarKey
-       ↓
-Gerar URL Pública
-       ↓
-Atualizar Profile
+```http
+GET /home?profileId={profileId}
 ```
 
 ---
 
-## Estrutura no Bucket
+## Response
+
+```json
+{
+  "continueWatching": [],
+  "music": [],
+  "technology": [],
+  "education": [],
+  "sports": [],
+  "documentary": [],
+  "entertainment": [],
+  "action": [],
+  "trending": []
+}
+```
+
+---
+
+## Trending
+
+Inicialmente baseado em:
 
 ```text
-profiles/
- └─ profile-id/
-     └─ avatar.jpg
+Mais assistidos
+```
+
+calculado através do Playback.
+
+---
+
+## Benefícios
+
+Uma única chamada para montar a Home.
+
+---
+
+# Prioridade 11 - Controle Parental
+
+## Objetivo
+
+Permitir restrição de conteúdo por perfil.
+
+---
+
+## Nova Enum
+
+```java
+public enum ContentRating {
+    FREE,
+    AGE_10,
+    AGE_12,
+    AGE_14,
+    AGE_16,
+    AGE_18
+}
+```
+
+---
+
+## Alteração em VideoContent
+
+```java
+private ContentRating rating;
+```
+
+---
+
+## Alteração em UserProfile
+
+```java
+private ContentRating maxAllowedRating;
+```
+
+---
+
+## Exemplos
+
+### Perfil Kids
+
+```java
+FREE
+```
+
+---
+
+### Perfil Filho
+
+```java
+AGE_12
+```
+
+---
+
+### Perfil Adulto
+
+```java
+AGE_18
+```
+
+---
+
+## Banco
+
+### Videos
+
+```sql
+ALTER TABLE videos
+ADD COLUMN rating VARCHAR(20);
+```
+
+### Profiles
+
+```sql
+ALTER TABLE profiles
+ADD COLUMN max_allowed_rating VARCHAR(20);
+```
+
+---
+
+## Regra
+
+Vídeo:
+
+```text
+John Wick
+AGE_16
+```
+
+Perfil:
+
+```text
+Kids
+FREE
+```
+
+Resultado:
+
+```text
+Não aparece.
+```
+
+---
+
+## Impactados
+
+Todos os endpoints de catálogo:
+
+```text
+Home
+Busca
+Trending
+Favoritos
+Histórico
+Continue Watching
+Recomendações Futuras
 ```
 
 ---
@@ -577,10 +615,10 @@ profiles/
 
 ---
 
-## Sprint 2
+## Sprint 2 ✅
 
 * Perfis
-* Upload Avatar
+* Avatar
 * Gestão de Perfis
 
 ---
@@ -601,22 +639,32 @@ profiles/
 
 ---
 
+## Sprint 5
+
+* Controle Parental
+* Classificação Etária
+* Perfis Kids
+
+---
+
 # Resultado Final Esperado
 
 Backend capaz de suportar:
 
-* Home estilo Netflix
-* Múltiplos perfis
+* Streaming HLS
+* Resume Playback
 * Continue Watching
+* Home estilo Netflix
 * Busca
+* Categorias fortes
+* Perfis múltiplos
 * Avatar
 * Favoritos
 * Histórico
 * Estatísticas
 * Trending
-* Streaming HLS
-* Resume Playback
-* Categorias fortes
+* Controle parental
+* Classificação etária
 * Home agregada
 
 Mantendo:
