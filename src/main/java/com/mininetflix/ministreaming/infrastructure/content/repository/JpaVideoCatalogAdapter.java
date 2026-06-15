@@ -92,4 +92,12 @@ public class JpaVideoCatalogAdapter implements VideoCatalogRepository {
                                 .toList();
         }
 
+        public List<VideoContent> findByIds(List<String> ids) {
+                return jpaRepository
+                                .findByIdIn(ids)
+                                .stream()
+                                .map(this::toDomain)
+                                .toList();
+        }
+
 }

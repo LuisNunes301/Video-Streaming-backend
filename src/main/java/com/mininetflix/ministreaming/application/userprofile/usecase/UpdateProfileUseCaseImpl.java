@@ -4,8 +4,6 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
-import com.mininetflix.ministreaming.application.content.port.VideoStorageService;
-import com.mininetflix.ministreaming.application.userprofile.dto.UpdateProfileOutput;
 import com.mininetflix.ministreaming.application.userprofile.dto.UpdateProfileRequest;
 import com.mininetflix.ministreaming.application.userprofile.port.UserProfileRepository;
 import com.mininetflix.ministreaming.domain.userprofile.UserProfile;

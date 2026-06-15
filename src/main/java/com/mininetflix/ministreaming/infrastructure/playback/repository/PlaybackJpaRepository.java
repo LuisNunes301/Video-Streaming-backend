@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import com.mininetflix.ministreaming.infrastructure.content.entity.VideoEntity;
 import com.mininetflix.ministreaming.infrastructure.playback.entity.PlaybackEntity;
 
 public interface PlaybackJpaRepository
@@ -16,4 +17,5 @@ public interface PlaybackJpaRepository
                         UUID contentId);
 
         List<PlaybackEntity> findByUserIdAndCompletedFalse(UUID userId);
+
 }

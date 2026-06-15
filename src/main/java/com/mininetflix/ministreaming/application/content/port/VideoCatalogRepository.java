@@ -17,4 +17,6 @@ public interface VideoCatalogRepository {
 
     List<VideoContent> searchByTitle(String query);
 
+    List<VideoContent> findByIds(List<String> ids);
+
 }

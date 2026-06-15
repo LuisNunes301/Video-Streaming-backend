@@ -85,4 +85,5 @@ public class PlaybackRepositoryAdapter implements PlaybackRepository {
 
                 return state;
         }
+
 }

@@ -1,7 +1,7 @@
 package com.mininetflix.ministreaming.application.profilefavorite.port;
 
 import java.util.List;
-import java.util.Optional;
+
 import java.util.UUID;
 
 import com.mininetflix.ministreaming.domain.profilefavorite.ProfileFavorite;

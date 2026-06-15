@@ -4,6 +4,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import org.springframework.web.bind.annotation.RestController;
 
+import com.mininetflix.ministreaming.application.playback.dto.ContinueWatchingItem;
 import com.mininetflix.ministreaming.application.playback.dto.SavePlaybackProgressInput;
 import com.mininetflix.ministreaming.application.playback.dto.StartPlaybackOutput;
 import com.mininetflix.ministreaming.application.playback.usecase.GetContinueWatchingUseCase;
@@ -67,7 +68,7 @@ public class PlaybackController {
 
         // list of video incomplete
         @GetMapping("/continue")
-        public ResponseEntity<List<PlaybackState>> continueWatching(
+        public ResponseEntity<List<ContinueWatchingItem>> continueWatching(
                         Authentication authentication) {
 
                 String userId = authentication.getName();

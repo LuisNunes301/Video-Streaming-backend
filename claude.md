@@ -1,10 +1,8 @@
-# MiniStreaming Backend Upgrade Roadmap
+# MiniStreaming - Roadmap Oficial
 
-## Objetivo
+## Projeto
 
-Evoluir o backend atual para suportar uma experiência mobile semelhante a plataformas modernas de streaming.
-
-Arquitetura base já existente:
+MiniStreaming é uma plataforma backend inspirada em Netflix, Prime Video e Disney+, construída utilizando:
 
 * Java 17
 * Spring Boot
@@ -13,668 +11,355 @@ Arquitetura base já existente:
 * MinIO
 * FFmpeg
 * JWT Authentication
+* Docker
 * Clean Architecture
 * DDD
 * Event-Driven Architecture
 
----
-
-# Prioridade 1 - Thumbnail Pública ✅
-
-Implementado.
-
-Objetivo:
-
-* Exibir thumbnails sem autenticação.
-* Permitir carregamento rápido da home.
+O objetivo do projeto é servir como um sistema realista de streaming moderno, focado em arquitetura escalável e boas práticas de engenharia de software.
 
 ---
 
-# Prioridade 2 - Categorias Fortes ✅
+# Arquitetura Atual
 
-Implementado.
+## Autenticação
 
-Exemplo:
+* JWT Authentication
+* Roles (USER / ADMIN)
+* Spring Security
 
-```java
-public enum VideoCategory {
-    MUSIC,
-    TECHNOLOGY,
-    EDUCATION,
-    SPORTS,
-    DOCUMENTARY,
-    ENTERTAINMENT,
-    ACTION
-}
-```
+## Upload de Vídeos
 
-Benefícios:
+* Upload assíncrono
+* RabbitMQ
+* Processamento via FFmpeg
+* Armazenamento no MinIO
 
-* Home organizada
+## Catálogo
+
+* Listagem de vídeos
+* Busca por título
 * Busca por categoria
-* Trending por categoria
-* Recomendações futuras
+* Thumbnail pública
 
----
+## Playback
 
-# Prioridade 3 - Busca ✅
+* Registro de reprodução
+* Controle de progresso
+* Histórico de visualização
 
-Implementado.
+## Perfil
+
+Separação entre:
+
+User
+
+e
+
+UserProfile
+
+Permitindo evolução futura para múltiplos perfis.
+
+## Avatar
+
+* Upload para MinIO
+* Avatar associado ao perfil
+* URL persistida no banco
+
+## Favoritos
+
+Cada perfil possui:
+
+* Lista de favoritos
+* Adição de favoritos
+* Remoção de favoritos
+* Consulta de favoritos
 
 Endpoints:
 
-```http
-GET /videos/search?q=java
-```
+POST /profiles/favorites/{videoId}
 
-Benefícios:
+DELETE /profiles/favorites/{videoId}
 
-* Busca textual
-* Busca por categoria
-* Base para descoberta de conteúdo
+GET /profiles/favorites
 
 ---
 
-# Prioridade 4 - Contas e Perfis ✅
+# Funcionalidades Concluídas
 
-## Objetivo
+## Prioridade 1
 
-Separar autenticação de personalização.
+### Thumbnail Pública
 
----
+Status:
 
-## User
-
-Responsável por:
-
-```text
-Login
-Senha
-JWT
-Roles
-Segurança
-Autenticação
-```
+CONCLUÍDO
 
 ---
 
-## UserProfile
+## Prioridade 2
 
-Responsável por:
+### Categorias Fortes
 
-```text
-Nickname
-Avatar
-Bio
-Histórico
-Favoritos
-Continue Watching
-Preferências
-Controle Parental
-```
+VideoCategory como enum.
+
+Status:
+
+CONCLUÍDO
 
 ---
 
-## Relacionamento
+## Prioridade 3
 
-```text
-User
- |
- | 1:N
- |
-UserProfile
-```
+### Busca de Vídeos
 
----
+Busca textual por título.
 
-## Modelo
+Status:
 
-```text
-Conta:
-
-Luis@email.com
-
-Perfis:
-
-👤 Luis
-👤 Filho
-👤 Kids
-```
+CONCLUÍDO
 
 ---
 
-## Entidade
+## Prioridade 4
 
-```java
-public class UserProfile {
+### Separação User / UserProfile
 
-    private UUID id;
+Estrutura preparada para evolução futura.
 
-    private UUID userId;
+Status:
 
-    private String nickname;
-
-    private String avatarKey;
-
-    private String bio;
-
-    private Boolean kidsProfile;
-
-    private LocalDateTime createdAt;
-
-    private LocalDateTime updatedAt;
-}
-```
+CONCLUÍDO
 
 ---
 
-## Fluxo de Registro
+## Prioridade 5
 
-```text
-Register User
-        ↓
-Persist User
-        ↓
-Create Default Profile
-        ↓
-nickname = user.name
-```
+### Estatísticas de Consumo
+
+Métricas de visualização e progresso.
+
+Status:
+
+CONCLUÍDO
 
 ---
 
-## Endpoints
+## Prioridade 6
 
-### Criar Perfil
+### Favoritos
 
-```http
-POST /profiles
-```
+* Adicionar favorito
+* Remover favorito
+* Listar favoritos
 
-### Listar Perfis
+Status:
 
-```http
-GET /profiles
-```
-
-### Buscar Perfil
-
-```http
-GET /profiles/{profileId}
-```
-
-### Atualizar Perfil
-
-```http
-PUT /profiles/{profileId}
-```
-
-### Remover Perfil
-
-```http
-DELETE /profiles/{profileId}
-```
+CONCLUÍDO
 
 ---
 
-# Prioridade 5 - Avatar via MinIO
+## Prioridade 7
 
-## Objetivo
+### Avatar via MinIO
 
-Permitir avatar customizado para cada perfil.
+* Bucket próprio
+* Upload
+* Persistência da URL
+* Integração com perfil
 
----
+Status:
 
-## Endpoint
-
-```http
-POST /profiles/{profileId}/avatar
-```
-
-multipart/form-data
-
-```text
-file
-```
+CONCLUÍDO
 
 ---
 
-## Estrutura
+# Próximas Prioridades
 
-```text
-avatars/
+## Prioridade 8
 
-profile-id/
- └── avatar.jpg
-```
+### Histórico Completo
 
----
+Objetivo:
 
-## Fluxo
+Permitir que o usuário visualize tudo que assistiu.
 
-```text
-Upload
-    ↓
-MinIO
-    ↓
-Salvar avatarKey
-    ↓
-Gerar URL Pública
-    ↓
-Atualizar Perfil
-```
+Endpoints previstos:
+
+GET /history
+
+Possíveis dados:
+
+* Vídeo
+* Data da visualização
+* Última posição
+* Tempo assistido
 
 ---
 
-# Prioridade 6 - Estatísticas de Consumo
+## Prioridade 9
 
-## Objetivo
+### Home Netflix
 
-Exibir métricas por perfil.
+Endpoint agregador:
 
----
+GET /home
 
-## Fonte
+Retornando:
 
-Playback
-
----
-
-## Endpoint
-
-```http
-GET /profiles/{profileId}/stats
-```
-
----
-
-## Response
-
-```json
-{
-  "videosWatched": 42,
-  "hoursWatched": 18,
-  "completedVideos": 10
-}
-```
-
----
-
-## Dados Derivados
-
-Playback:
-
-```text
-currentTime
-completed
-lastUpdated
-```
-
----
-
-# Prioridade 7 - Favoritos
-
-## Banco
-
-```sql
-CREATE TABLE profile_favorites (
-    id UUID PRIMARY KEY,
-
-    profile_id UUID NOT NULL,
-
-    video_id UUID NOT NULL,
-
-    created_at TIMESTAMP
-);
-```
-
----
-
-## Endpoints
-
-### Adicionar Favorito
-
-```http
-POST /profiles/{profileId}/favorites/{videoId}
-```
-
-### Remover Favorito
-
-```http
-DELETE /profiles/{profileId}/favorites/{videoId}
-```
-
-### Listar Favoritos
-
-```http
-GET /profiles/{profileId}/favorites
-```
-
----
-
-# Prioridade 8 - Histórico
-
-## Objetivo
-
-Separar Histórico Completo de Continue Watching.
-
----
-
-## Fonte
-
-Playback
-
----
-
-## Endpoint
-
-```http
-GET /profiles/{profileId}/history
-```
-
----
-
-## Response
-
-```json
-[
-  {
-    "videoId": "...",
-    "title": "...",
-    "thumbnailUrl": "...",
-    "watchedAt": "2026-06-04"
-  }
-]
-```
-
----
-
-# Prioridade 9 - Continue Watching Melhorado
-
-## Situação Atual
-
-Retorna:
-
-```java
-PlaybackState
-```
-
----
-
-## Problema
-
-Frontend precisa buscar dados do vídeo separadamente.
-
----
-
-## Novo DTO
-
-```json
-[
-  {
-    "videoId": "...",
-    "title": "...",
-    "thumbnailUrl": "...",
-    "progressSeconds": 150,
-    "duration": 372
-  }
-]
-```
-
----
-
-## Benefícios
-
-Renderização imediata.
-
-Menos chamadas HTTP.
-
----
-
-# Prioridade 10 - Home Agregada
-
-## Objetivo
-
-Retornar toda a Home em uma única chamada.
-
----
-
-## Endpoint
-
-```http
-GET /home?profileId={profileId}
-```
-
----
-
-## Response
-
-```json
-{
-  "continueWatching": [],
-  "music": [],
-  "technology": [],
-  "education": [],
-  "sports": [],
-  "documentary": [],
-  "entertainment": [],
-  "action": [],
-  "trending": []
-}
-```
-
----
-
-## Trending
-
-Inicialmente baseado em:
-
-```text
-Mais assistidos
-```
-
-calculado através do Playback.
-
----
-
-## Benefícios
-
-Uma única chamada para montar a Home.
-
----
-
-# Prioridade 11 - Controle Parental
-
-## Objetivo
-
-Permitir restrição de conteúdo por perfil.
-
----
-
-## Nova Enum
-
-```java
-public enum ContentRating {
-    FREE,
-    AGE_10,
-    AGE_12,
-    AGE_14,
-    AGE_16,
-    AGE_18
-}
-```
-
----
-
-## Alteração em VideoContent
-
-```java
-private ContentRating rating;
-```
-
----
-
-## Alteração em UserProfile
-
-```java
-private ContentRating maxAllowedRating;
-```
-
----
-
-## Exemplos
-
-### Perfil Kids
-
-```java
-FREE
-```
-
----
-
-### Perfil Filho
-
-```java
-AGE_12
-```
-
----
-
-### Perfil Adulto
-
-```java
-AGE_18
-```
-
----
-
-## Banco
-
-### Videos
-
-```sql
-ALTER TABLE videos
-ADD COLUMN rating VARCHAR(20);
-```
-
-### Profiles
-
-```sql
-ALTER TABLE profiles
-ADD COLUMN max_allowed_rating VARCHAR(20);
-```
-
----
-
-## Regra
-
-Vídeo:
-
-```text
-John Wick
-AGE_16
-```
-
-Perfil:
-
-```text
-Kids
-FREE
-```
-
-Resultado:
-
-```text
-Não aparece.
-```
-
----
-
-## Impactados
-
-Todos os endpoints de catálogo:
-
-```text
-Home
-Busca
-Trending
-Favoritos
-Histórico
-Continue Watching
-Recomendações Futuras
-```
-
----
-
-# Ordem Recomendada
-
-## Sprint 1 ✅
-
-* Thumbnail Pública
-* Categorias Fortes
-* Busca
-
----
-
-## Sprint 2 ✅
-
-* Perfis
-* Avatar
-* Gestão de Perfis
-
----
-
-## Sprint 3
-
-* Estatísticas
-* Favoritos
-* Histórico
-
----
-
-## Sprint 4
-
-* Continue Watching Melhorado
-* Home Agregada
 * Trending
-
----
-
-## Sprint 5
-
-* Controle Parental
-* Classificação Etária
-* Perfis Kids
-
----
-
-# Resultado Final Esperado
-
-Backend capaz de suportar:
-
-* Streaming HLS
-* Resume Playback
 * Continue Watching
-* Home estilo Netflix
-* Busca
-* Categorias fortes
-* Perfis múltiplos
-* Avatar
-* Favoritos
-* Histórico
-* Estatísticas
-* Trending
-* Controle parental
-* Classificação etária
-* Home agregada
+* Categorias
+* Recomendados
+* Últimos adicionados
 
-Mantendo:
+Objetivo:
+
+Reduzir múltiplas chamadas do frontend.
+
+---
+
+## Prioridade 10
+
+### Continue Watching Enriquecido
+
+Atualmente existe playback.
+
+A evolução consiste em retornar:
+
+* Thumbnail
+* Título
+* Categoria
+* Percentual assistido
+* Duração
+* Tempo restante
+
+Experiência semelhante à Netflix.
+
+---
+
+## Prioridade 11
+
+### Múltiplos Perfis
+
+Evolução do modelo atual.
+
+Hoje:
+
+User
+└── UserProfile
+
+Futuro:
+
+User
+├── Profile 1
+├── Profile 2
+├── Profile 3
+└── Profile 4
+
+Cada perfil possuirá:
+
+* Histórico próprio
+* Favoritos próprios
+* Continue Watching próprio
+* Recomendações próprias
+
+---
+
+## Prioridade 12
+
+### Controle Parental
+
+Dependência:
+
+Prioridade 11
+
+Recursos previstos:
+
+* Perfil Infantil
+* Restrição por classificação indicativa
+* Limite de idade
+* Bloqueio de conteúdo adulto
+
+Exemplo:
+
+KIDS
+
+Permite apenas:
+
+* Livre
+* 10 anos
+
+ADULT
+
+Permite:
+
+* Todo catálogo
+
+---
+
+# Evoluções Futuras (Longo Prazo)
+
+## Recomendações
+
+Motor de recomendação baseado em:
+
+* Histórico
+* Favoritos
+* Categorias assistidas
+
+---
+
+## Trending Inteligente
+
+Vídeos populares por:
+
+* Dia
+* Semana
+* Mês
+
+---
+
+## Sistema de Avaliações
+
+Curtir / Não Curtir
+
+ou
+
+Avaliação por estrelas.
+
+---
+
+## Notificações
+
+Integração via RabbitMQ para:
+
+* Novo vídeo
+* Vídeo processado
+* Recomendações
+
+---
+
+## Dashboard Administrativo
+
+Métricas:
+
+* Vídeos enviados
+* Vídeos assistidos
+* Usuários ativos
+* Tempo médio de visualização
+
+---
+
+# Objetivo Final
+
+Construir uma plataforma de streaming inspirada em arquiteturas utilizadas por Netflix, Prime Video e Disney+, aplicando:
 
 * Clean Architecture
 * DDD
-* Event-Driven Architecture
-* RabbitMQ
-* PostgreSQL
-* MinIO
-* Spring Boot
-* FFmpeg
-* Docker
+* Event-Driven
+* Mensageria
+* Cloud Storage
+* Processamento Assíncrono
+* Escalabilidade
+* Boas práticas de backend moderno

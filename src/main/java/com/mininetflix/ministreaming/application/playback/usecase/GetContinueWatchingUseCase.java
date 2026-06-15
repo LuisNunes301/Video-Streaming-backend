@@ -2,9 +2,9 @@ package com.mininetflix.ministreaming.application.playback.usecase;
 
 import java.util.List;
 
-import com.mininetflix.ministreaming.domain.playback.PlaybackState;
+import com.mininetflix.ministreaming.application.playback.dto.ContinueWatchingItem;
 
 public interface GetContinueWatchingUseCase {
 
-    List<PlaybackState> execute(String userId);
+    List<ContinueWatchingItem> execute(String userId);
 }

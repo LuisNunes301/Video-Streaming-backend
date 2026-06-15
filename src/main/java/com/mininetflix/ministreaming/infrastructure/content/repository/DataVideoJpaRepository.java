@@ -12,5 +12,7 @@ public interface DataVideoJpaRepository
                 extends JpaRepository<VideoEntity, String> {
         List<VideoEntity> findByCategory(VideoCategory category);
 
+        List<VideoEntity> findByIdIn(List<String> ids);
+
         List<VideoEntity> findByTitleContainingIgnoreCase(String title);
 }

@@ -10,8 +10,7 @@ import org.springframework.stereotype.Component;
 import com.mininetflix.ministreaming.application.content.dto.PreviewResult;
 import com.mininetflix.ministreaming.application.content.port.VideoPreviewGenerator;
 import com.mininetflix.ministreaming.application.content.port.VideoStorageService;
-import com.mininetflix.ministreaming.application.storage.StorageBucketEnum;
-import com.mininetflix.ministreaming.application.storage.StorageService;
+
 import com.mininetflix.ministreaming.infrastructure.storage.ThumbnailStorageService;
 
 import lombok.RequiredArgsConstructor;
