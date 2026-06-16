@@ -1,354 +1,448 @@
 # MiniStreaming
 
-MiniStreaming é uma aplicação backend desenvolvida em **Java + Spring
-Boot**, projetada com **Clean Architecture + DDD + Event-Driven
-Architecture**, simulando a base estrutural de uma plataforma de
-streaming moderna.
+MiniStreaming é uma plataforma backend de streaming inspirada em Netflix, Prime Video e Disney+, construída com Java e Spring Boot utilizando Clean Architecture, DDD e Event-Driven Architecture.
 
-### DIAGRAMA 1: CAMADA DE DOMÍNIO 
-``` mermaid
-graph TB
-    title["CAMADA DE DOMÍNIO<br/>Regras de Negócio e Entidades"]
-    style title fill:#fff,stroke:none,font-family:Arial,font-size:16px,font-weight:bold
+O projeto foi desenvolvido com foco em arquitetura escalável, desacoplamento entre contextos, processamento assíncrono e boas práticas de engenharia de software.
 
-    subgraph Dominio["ENTIDADES CENTRAIS"]
-        direction TB
-        
-        Video["VideoContent"]
-        Status["VideoStatus<br/>UPLOADING | PROCESSING | READY | FAILED"]
-        Playback["PlaybackState"]
-        Usuario["User"]
-        Perfil["UserRole"]
-        
-        Video --> Status
-        Usuario --> Perfil
-    end
+---
 
-    subgraph Excecoes["EXCEÇÕES DE NEGÓCIO"]
-        Ex1["VideoNotFoundException"]
-        Ex2["EmailAlreadyExistsException"]
-        Ex3["BusinessException"]
-    end
+# Tecnologias
 
-    subgraph Responsabilidades["RESPONSABILIDADES"]
-        R1["• Define entidades e estados"]
-        R2["• Implementa transições válidas de status"]
-        R3["• Não depende de framework"]
-        R4["• Núcleo da aplicação"]
-    end
+* Java 17
+* Spring Boot
+* Spring Security
+* JWT Authentication
+* PostgreSQL
+* RabbitMQ
+* MinIO
+* FFmpeg
+* Docker
+* JPA / Hibernate
 
-    classDef entidades fill:#f3e5f5,stroke:#7b1fa2,stroke-width:3px
-    classDef excecoes fill:#ffebee,stroke:#c62828,stroke-width:2px
-    classDef responsabilidades fill:#f5f5f5,stroke:#9e9e9e,stroke-width:1px,stroke-dasharray: 3 3
-    
-    class Video,Status,Playback,Usuario,Perfil entidades
-    class Ex1,Ex2,Ex3 excecoes
-    class R1,R2,R3,R4 responsabilidades
-
-```
-### DIAGRAMA 2: CAMADA DE APLICAÇÃO (Casos de Uso)
-```mermaid
-graph TB
-    title["CAMADA DE APLICAÇÃO<br/>Casos de Uso e Ports"]
-    style title fill:#fff,stroke:none,font-family:Arial,font-size:16px,font-weight:bold
-
-    subgraph UseCases["CASOS DE USO"]
-        direction TB
-        
-        UC1["UploadVideoUseCase"]
-        UC2["ListVideosUseCase"]
-        UC3["ProcessVideoUseCase"]
-        
-        UP1["StartPlaybackUseCase"]
-        UP2["GetPlaybackProgressUseCase"]
-        UP3["SavePlaybackProgressUseCase"]
-        
-        UU1["RegisterUserUseCase"]
-        UU2["AuthenticateUserUseCase"]
-    end
-
-    subgraph Ports["PORTS (INTERFACES)"]
-        direction TB
-        P1["VideoCatalogRepository"]
-        P2["VideoStorageService"]
-        P3["VideoMetadataExtractor"]
-        P4["VideoProcessingPublisher"]
-        P5["PlaybackRepository"]
-        P6["UserRepository"]
-    end
-
-    UC1 --> P1 & P2 & P4
-    UC2 --> P1
-    UC3 --> P1 & P3
-    
-    UP1 --> P5
-    UP2 --> P5
-    UP3 --> P5
-    
-    UU1 --> P6
-    UU2 --> P6
-
-    classDef usecase fill:#e3f2fd,stroke:#1565c0,stroke-width:3px
-    classDef ports fill:#fff3e0,stroke:#ff6f00,stroke-width:2px,stroke-dasharray: 5 5
-    
-    class UC1,UC2,UC3,UP1,UP2,UP3,UU1,UU2 usecase
-    class P1,P2,P3,P4,P5,P6 ports
-
-
-```
-### DIAGRAMA 3: CAMADA DE INFRAESTRUTURA (Implementações)
-```mermaid
-graph TB
-    title["CAMADA DE INFRAESTRUTURA<br/>Implementações Técnicas"]
-    style title fill:#fff,stroke:none,font-family:Arial,font-size:16px,font-weight:bold
-
-    subgraph Persistencia["PERSISTÊNCIA"]
-        IR1["JpaVideoCatalogRepository"]
-        IR2["PlaybackRepositoryImpl"]
-        IR3["UserJpaRepositoryAdapter"]
-        DB["PostgreSQL"]
-    end
-
-    subgraph Storage["ARMAZENAMENTO"]
-        S1["MinioVideoStorageService"]
-        S2["MinIO Server"]
-    end
-
-    subgraph Mensageria["MENSAGERIA"]
-        M1["RabbitMQPublisher"]
-        M2["RabbitMQConsumer"]
-        M3["RabbitMQ Broker"]
-    end
-
-    subgraph Processamento["PROCESSAMENTO"]
-        F1["FFmpeg (ProcessBuilder)"]
-        F2["VideoMetadataExtractorImpl"]
-    end
-
-    IR1 --> DB
-    IR2 --> DB
-    IR3 --> DB
-    
-    S1 --> S2
-    
-    M1 --> M3
-    M3 --> M2
-    
-    M2 --> F1
-    F1 --> S1
-
-    classDef infra fill:#e8f5e8,stroke:#2e7d32,stroke-width:3px
-    classDef externo fill:#fff3e0,stroke:#e65100,stroke-width:3px
-    
-    class IR1,IR2,IR3,S1,M1,M2,F1,F2 infra
-    class DB,S2,M3 externo
-
-``` 
-### DIAGRAMA 4: CAMADA WEB (Interface com Usuário)
-```mermaid
-graph TB
-    title["CAMADA WEB<br/>Controllers REST"]
-    style title fill:#fff,stroke:none,font-family:Arial,font-size:16px,font-weight:bold
-
-    subgraph Controllers["CONTROLLERS"]
-        C1["VideoUploadController"]
-        C2["VideoCatalogController"]
-        C3["PlaybackController"]
-        C4["AuthController"]
-    end
-
-    subgraph Endpoints["ENDPOINTS"]
-        
-        subgraph Content["Conteúdo"]
-            E1["POST /api/videos/upload"]
-            E2["GET /api/videos"]
-            E3["GET /api/videos/{id}"]
-        end
-        
-        subgraph Playback["Reprodução"]
-            E4["POST /api/playback/start"]
-            E5["GET /api/playback/progress/{id}"]
-            E6["PUT /api/playback/progress"]
-        end
-        
-        subgraph Auth["Autenticação"]
-            E7["POST /api/auth/register"]
-            E8["POST /api/auth/login"]
-        end
-    end
-
-    C1 --> E1
-    C2 --> E2 & E3
-    C3 --> E4 & E5 & E6
-    C4 --> E7 & E8
-
-    classDef web fill:#fff3e0,stroke:#e65100,stroke-width:3px
-    classDef endpoints fill:#e1f5fe,stroke:#01579b,stroke-width:2px
-    
-    class C1,C2,C3,C4 web
-    class E1,E2,E3,E4,E5,E6,E7,E8 endpoints
-
-```
-### DIAGRAMA 5: VISÃO GERAL DO FLUXO (Resumo)
-```mermaid
-graph TB
-    title["PLATAFORMA DE VÍDEOS - ARQUITETURA FINAL EM DOCKER"]
-    style title fill:#fff,stroke:none,font-family:Arial,font-size:20px,font-weight:bold
-
-    User(("👤 Usuário"))
-
-    subgraph Docker["CONTAINERS DOCKER"]
-
-        Nginx["Nginx<br/>Reverse Proxy<br/>Porta 80"]
-        
-        App["Spring Boot App<br/>Swagger UI + FFmpeg<br/>Porta 8080"]
-
-        DB["PostgreSQL<br/>Banco de Dados<br/>Porta 5432"]
-
-        Queue["RabbitMQ<br/>Mensageria<br/>Portas: 5672, 15672"]
-
-        Storage["MinIO<br/>Armazenamento S3<br/>Portas: 9000, 9001"]
-
-        User -->|HTTP /api| Nginx
-        Nginx -->|Proxy API| App
-        Nginx -->|Proxy Videos| Storage
-        Nginx -->|Proxy Console| Storage
-
-        App -->|JPA/Hibernate| DB
-        App -->|Mensagens| Queue
-        App -->|S3 API| Storage
-        Queue -.->|Processamento Assíncrono| App
-    end
-
-    classDef app fill:#e3f2fd,stroke:#1565c0,stroke-width:3px,r:10px
-    classDef infra fill:#e8f5e8,stroke:#2e7d32,stroke-width:3px,r:10px
-    classDef externo fill:#fff3e0,stroke:#e65100,stroke-width:3px,r:10px
-    classDef user fill:#f3e5f5,stroke:#7b1fa2,stroke-width:3px,r:10px
-
-    class App,Nginx app
-    class DB,Queue,Storage infra
-    class User user
-
-```
-------------------------------------------------------------------------
-
-# Funcionalidades
-
--   Upload de vídeos
--   Processamento assíncrono com RabbitMQ
--   Extração de metadata (ex: duração, resolução)
--   Geração de HLS
--   Catálogo com controle de status
--   Autenticação com JWT
--   Persistência com JPA
--   Armazenamento de objetos com MinIO (S3 compatible)
-
-------------------------------------------------------------------------
+---
 
 # Arquitetura
 
-O projeto segue separação clara de responsabilidades:
+O projeto segue os princípios de:
 
-    Domain
-    Application (Use Cases + Ports)
-    Infrastructure (Adapters)
-    Web (Controllers)
+* Clean Architecture
+* Domain Driven Design (DDD)
+* Ports and Adapters
+* Event-Driven Architecture
+* Separação entre Domínio e Infraestrutura
 
-## Princípios aplicados
+Estrutura:
 
--   Clean Architecture
--   Domain-Driven Design (DDD)
--   Ports and Adapters
--   Event-Driven Architecture
--   Separação entre regra de negócio e infraestrutura
+```text
+domain
+application
+infrastructure
+web
+```
 
-------------------------------------------------------------------------
+---
 
-# Ciclo de Vida do Vídeo
+# Funcionalidades Implementadas
 
-Fluxo de estados:
+## Autenticação
 
-    UPLOADING → PROCESSING → READY
-                          ↘ FAILED
+* Registro de usuário
+* Login JWT
+* Roles USER e ADMIN
+* Spring Security
 
-### Estados:
+Endpoints:
 
--   **UPLOADING** → vídeo recebido e armazenado
--   **PROCESSING** → evento publicado no RabbitMQ
--   **READY** → metadata extraída + HLS gerado
--   **FAILED** → erro no pipeline
+```http
+POST /auth/register
+POST /auth/login
+```
 
-O `VideoStatus` é a única fonte de verdade do estado do vídeo.
+---
 
-------------------------------------------------------------------------
+## Upload de Vídeos
 
-# Fluxo Assíncrono
+* Upload assíncrono
+* Armazenamento no MinIO
+* Processamento via RabbitMQ
+* Conversão para HLS
+* Extração de metadados
+* Geração de thumbnail
 
-1.  Upload do vídeo via endpoint
-2.  Armazenamento no MinIO
-3.  Publicação de evento no RabbitMQ
-4.  Consumer processa o vídeo
-5.  Atualização de status no banco
+Fluxo:
 
-------------------------------------------------------------------------
+```text
+Upload
+↓
+MinIO
+↓
+RabbitMQ
+↓
+FFmpeg
+↓
+Thumbnail
+↓
+HLS
+↓
+Catálogo
+```
+
+---
+
+## Catálogo
+
+* Listagem de vídeos
+* Busca por título
+* Busca por categoria
+* Consulta individual
+
+Endpoints:
+
+```http
+GET /videos
+
+GET /videos/{id}
+
+GET /videos/search?query=
+
+GET /videos/category/{category}
+```
+
+---
+
+## Categorias
+
+Categorias fortemente tipadas:
+
+```java
+MUSIC
+DOCUMENTARY
+TECHNOLOGY
+EDUCATION
+SPORTS
+NEWS
+GAMING
+ENTERTAINMENT
+```
+
+---
+
+## Thumbnail Pública
+
+Cada vídeo possui thumbnail pública gerada automaticamente.
+
+Exemplo:
+
+```text
+/videos/previews/{videoId}/thumbnail.jpg
+```
+
+---
+
+## Perfil
+
+Separação entre:
+
+```text
+User
+└── UserProfile
+```
+
+Preparado para futura evolução para múltiplos perfis.
+
+---
+
+## Avatar
+
+Upload de avatar utilizando MinIO.
+
+Funcionalidades:
+
+* Bucket dedicado
+* Upload
+* Persistência da URL
+* Associação ao perfil
+
+Endpoints:
+
+```http
+POST /profiles/avatar
+
+GET /profiles/me
+```
+
+---
+
+## Favoritos
+
+Cada perfil possui sua própria lista de favoritos.
+
+Endpoints:
+
+```http
+POST /profiles/favorites/{videoId}
+
+DELETE /profiles/favorites/{videoId}
+
+GET /profiles/favorites
+```
+
+---
+
+## Playback
+
+Controle completo de reprodução.
+
+Funcionalidades:
+
+* Início de reprodução
+* Recuperação de progresso
+* Salvamento de progresso
+* Marcação automática de conclusão
+
+Endpoints:
+
+```http
+GET /playback/start/{contentId}
+
+POST /playback/progress
+
+GET /playback/{contentId}
+```
+
+---
+
+## Continue Watching
+
+Lista vídeos iniciados e ainda não concluídos.
+
+Endpoint:
+
+```http
+GET /playback/continue
+```
+
+Retorna:
+
+* Video ID
+* Título
+* Thumbnail
+* Categoria
+* Duração
+* Tempo atual
+* Percentual assistido
+
+Exemplo:
+
+```json
+{
+  "videoId": "...",
+  "title": "...",
+  "thumbnailUrl": "...",
+  "duration": 109,
+  "currentTime": 10,
+  "progressPercent": 9,
+  "category": "SPORTS"
+}
+```
+
+---
+
+## Home Netflix
+
+Endpoint agregador da tela inicial.
+
+```http
+GET /home
+```
+
+Retorna:
+
+```json
+{
+  "trending": [],
+  "continueWatching": [],
+  "categories": []
+}
+```
+
+Seções:
+
+* Trending
+* Continue Watching
+* Categorias
+
+---
+
+## Estatísticas de Consumo
+
+Contexto separado de Analytics.
+
+Funcionalidades:
+
+* Visualizações totais
+* Visualizações completas
+* Segundos assistidos
+
+Eventos:
+
+```text
+VideoCompletedEvent
+```
+
+RabbitMQ:
+
+```text
+video.completed
+```
+
+Endpoint:
+
+```http
+GET /statistics/video/{videoId}
+```
+
+Resposta:
+
+```json
+{
+  "videoId": "...",
+  "views": 10,
+  "completedViews": 4,
+  "watchedSeconds": 1500
+}
+```
+
+---
+
+# Modelo de Domínio
+
+Principais agregados:
+
+```text
+VideoContent
+
+PlaybackState
+
+VideoStatistics
+
+User
+
+UserProfile
+```
+
+---
+
+# Estados do Vídeo
+
+Fluxo:
+
+```text
+UPLOADING
+    ↓
+PROCESSING
+    ↓
+READY
+
+ou
+
+PROCESSING
+    ↓
+FAILED
+```
+
+Estados:
+
+```java
+UPLOADING
+PROCESSING
+READY
+FAILED
+```
+
+---
+
+# Mensageria
+
+RabbitMQ é utilizado para:
+
+## Processamento de vídeo
+
+```text
+video.uploaded
+```
+
+Responsável por:
+
+* Processamento FFmpeg
+* Extração de metadata
+* Geração de thumbnail
+* Conversão HLS
+
+## Analytics
+
+```text
+video.completed
+```
+
+Responsável por:
+
+* Atualização das estatísticas de consumo
+
+---
+
+# Armazenamento
+
+MinIO utilizado para:
+
+* Vídeos originais
+* Arquivos HLS
+* Thumbnails
+* Avatares
+
+---
 
 # Segurança
 
--   Autenticação via JWT
--   Senhas criptografadas com BCrypt
--   Controle de acesso baseado em roles
+* JWT Authentication
+* BCrypt
+* Spring Security
+* Controle por Roles
 
-------------------------------------------------------------------------
+---
 
-# Playback
+# Executando com Docker
 
--   Início de reprodução
--   Salvamento de progresso
--   Recuperação de estado
-
-------------------------------------------------------------------------
-
-# Stack Tecnológica
-
--   Java 17+
--   Spring Boot
--   Spring Data JPA
--   RabbitMQ   
--   MinIO
--   JWT
--   FFmpeg
--   Docker
-
-------------------------------------------------------------------------
-
-#  Executando com Docker (exemplo)
-
-``` bash
+```bash
 docker-compose up -d
 ```
 
-Serviços esperados:
+Serviços:
 
--   PostgreSQL
--   RabbitMQ
--   MinIO
--   App( Java + ffmpeg)
+* PostgreSQL
+* RabbitMQ
+* MinIO
+* MiniStreaming
 
+---
 
-------------------------------------------------------------------------
+# Objetivo do Projeto
 
-#  Objetivo do Projeto
+O MiniStreaming foi desenvolvido para demonstrar conhecimento em:
 
-Este projeto foi desenvolvido como laboratório arquitetural para:
+* Backend moderno
+* Arquitetura limpa
+* DDD
+* Event-Driven Architecture
+* RabbitMQ
+* MinIO
+* Processamento assíncrono
+* Streaming HLS
+* Integração entre serviços
+* Projetos inspirados em plataformas reais de streaming
 
--   Explorar arquitetura limpa na prática
--   Modelar agregados corretamente
--   Trabalhar com processamento assíncrono
--   Simular padrões usados por plataformas reais de streaming
--   Evoluir para possível arquitetura de microsserviços
+---
 
-------------------------------------------------------------------------
+# Autor
 
-#  Autor
-
-Desenvolvido por Luis Nunes.
+Luis Nunes

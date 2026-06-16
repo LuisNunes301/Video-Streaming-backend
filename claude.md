@@ -16,7 +16,7 @@ MiniStreaming é uma plataforma backend inspirada em Netflix, Prime Video e Disn
 * DDD
 * Event-Driven Architecture
 
-O objetivo do projeto é servir como um sistema realista de streaming moderno, focado em arquitetura escalável, desacoplamento entre contextos e boas práticas de engenharia de software.
+O objetivo do projeto é servir como uma implementação realista de uma plataforma de streaming moderna, demonstrando arquitetura escalável, desacoplamento entre contextos e boas práticas de engenharia de software.
 
 ---
 
@@ -29,12 +29,12 @@ Implementado:
 * JWT Authentication
 * Spring Security
 * Roles USER e ADMIN
-* Filtros JWT customizados
+* Filtro JWT customizado
 * Endpoints protegidos
 
 ---
 
-## Upload de Vídeos
+## Upload e Processamento de Vídeos
 
 Implementado:
 
@@ -42,14 +42,14 @@ Implementado:
 * RabbitMQ
 * Processamento via FFmpeg
 * Conversão para HLS
-* Armazenamento no MinIO
 * Geração automática de thumbnails
+* Armazenamento no MinIO
 
 Fluxo:
 
 Upload
-→ Evento RabbitMQ
-→ FFmpeg
+→ RabbitMQ
+→ Processamento FFmpeg
 → Thumbnail
 → HLS
 → Atualização do Catálogo
@@ -61,12 +61,10 @@ Upload
 Implementado:
 
 * Listagem de vídeos
-* Busca textual por título
+* Busca por título
 * Busca por categoria
 * Consulta individual
-* Catálogo baseado em domínio
-
-Repositório:
+* Catálogo orientado ao domínio
 
 ```java
 public interface VideoCatalogRepository {
@@ -80,7 +78,6 @@ public interface VideoCatalogRepository {
     List<VideoContent> findByCategory(VideoCategory category);
 
     List<VideoContent> searchByTitle(String query);
-
 }
 ```
 
@@ -101,7 +98,7 @@ GAMING
 ENTERTAINMENT
 ```
 
-Não existem categorias livres no banco.
+Não existem categorias livres persistidas no banco.
 
 ---
 
@@ -128,7 +125,7 @@ User
 └── UserProfile
 ```
 
-Separação concluída para permitir evolução futura para múltiplos perfis.
+Preparada para futura evolução para múltiplos perfis.
 
 ---
 
@@ -157,11 +154,11 @@ GET /profiles/me
 
 Implementado.
 
-Cada perfil possui:
+Funcionalidades:
 
-* Adição de favoritos
-* Remoção de favoritos
-* Consulta de favoritos
+* Adicionar favorito
+* Remover favorito
+* Consultar favoritos
 
 Endpoints:
 
@@ -182,8 +179,8 @@ Implementado.
 Funcionalidades:
 
 * Início de reprodução
-* Recuperação do progresso
-* Salvamento de progresso
+* Recuperação de progresso
+* Persistência de progresso
 * Controle de conclusão
 * Continue Watching
 
@@ -229,8 +226,6 @@ Exemplo:
 }
 ```
 
-Modelo semelhante ao utilizado pela Netflix.
-
 ---
 
 ## Home Netflix
@@ -261,97 +256,92 @@ Estrutura:
 
 Objetivo:
 
-Reduzir chamadas do frontend e fornecer uma única resposta agregada para a tela inicial.
+Fornecer uma única chamada para montagem da Home do frontend.
+
+---
+
+## Estatísticas de Consumo
+
+Implementado.
+
+Arquitetura Event-Driven:
+
+```text
+Playback Completed
+        ↓
+VideoCompletedEvent
+        ↓
+RabbitMQ
+        ↓
+VideoCompletedConsumer
+        ↓
+VideoStatistics
+```
+
+Métricas disponíveis:
+
+* Total de visualizações
+* Visualizações completas
+* Tempo total assistido
+
+Endpoint:
+
+```http
+GET /statistics/video/{videoId}
+```
+
+Exemplo:
+
+```json
+{
+  "videoId": "...",
+  "views": 4,
+  "completedViews": 4,
+  "watchedSeconds": 436.07
+}
+```
 
 ---
 
 # Funcionalidades Concluídas
 
-## Prioridade 1
-
-### Thumbnail Pública
-
-Status:
+## Prioridade 1 — Thumbnail Pública
 
 ✅ CONCLUÍDO
 
----
-
-## Prioridade 2
-
-### Categorias Fortes
-
-Status:
+## Prioridade 2 — Categorias Fortes
 
 ✅ CONCLUÍDO
 
----
-
-## Prioridade 3
-
-### Busca de Vídeos
-
-Status:
+## Prioridade 3 — Busca de Vídeos
 
 ✅ CONCLUÍDO
 
----
-
-## Prioridade 4
-
-### Separação User / UserProfile
-
-Status:
+## Prioridade 4 — Separação User / UserProfile
 
 ✅ CONCLUÍDO
 
----
-
-## Prioridade 5
-
-### Favoritos
-
-Status:
+## Prioridade 5 — Favoritos
 
 ✅ CONCLUÍDO
 
----
-
-## Prioridade 6
-
-### Avatar via MinIO
-
-Status:
+## Prioridade 6 — Avatar via MinIO
 
 ✅ CONCLUÍDO
 
----
-
-## Prioridade 7
-
-### Continue Watching
-
-Status:
+## Prioridade 7 — Continue Watching
 
 ✅ CONCLUÍDO
 
----
-
-## Prioridade 8
-
-### Continue Watching Enriquecido
-
-Status:
+## Prioridade 8 — Continue Watching Enriquecido
 
 ✅ CONCLUÍDO
 
----
+## Prioridade 9 — Home Netflix
 
-## Prioridade 9
+✅ CONCLUÍDO
 
-### Home Netflix
-
-Status:
+## Prioridade 10 — Estatísticas de Consumo
 
 ✅ CONCLUÍDO
 
@@ -359,72 +349,38 @@ Status:
 
 # Próximas Prioridades
 
-## Prioridade 10
+## Prioridade 11 — Trending Inteligente
 
-### Estatísticas de Consumo
-
-Objetivo:
-
-Registrar métricas reais de uso da plataforma.
-
-Métricas previstas:
-
-* Total de visualizações
-* Horas assistidas
-* Vídeos mais vistos
-* Categorias mais consumidas
-* Usuários ativos
-
-Essa funcionalidade servirá como base para:
-
-* Trending real
-* Dashboard administrativo
-* Recomendações
-
----
-
-## Prioridade 11
-
-### Trending Inteligente
-
-Dependência:
-
-Prioridade 10
-
-Hoje:
+Substituir:
 
 ```text
 Trending = vídeos mais recentes
 ```
 
-Futuro:
+Por:
 
 ```text
 Trending = vídeos mais assistidos
 ```
 
-Critérios:
+Baseado em:
 
-* Dia
-* Semana
-* Mês
+* Views
+* Completed Views
+* Watch Time
 
 ---
 
-## Prioridade 12
+## Prioridade 12 — Múltiplos Perfis
 
-### Múltiplos Perfis
-
-Evolução da estrutura atual.
-
-Hoje:
+Evolução da estrutura atual:
 
 ```text
 User
 └── UserProfile
 ```
 
-Futuro:
+Para:
 
 ```text
 User
@@ -438,18 +394,16 @@ Cada perfil possuirá:
 
 * Continue Watching próprio
 * Favoritos próprios
-* Histórico próprio
 * Recomendações próprias
+* Estatísticas próprias
 
 ---
 
-## Prioridade 13
-
-### Controle Parental
+## Prioridade 13 — Controle Parental
 
 Dependência:
 
-Prioridade 12
+* Múltiplos Perfis
 
 Funcionalidades:
 
@@ -457,17 +411,6 @@ Funcionalidades:
 * Restrição etária
 * Classificação indicativa
 * Catálogo filtrado
-
-Exemplo:
-
-```text
-KIDS
-→ Livre
-→ 10 anos
-
-ADULT
-→ Todo catálogo
-```
 
 ---
 
