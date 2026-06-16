@@ -6,6 +6,8 @@ import com.mininetflix.ministreaming.application.content.port.VideoCatalogReposi
 import com.mininetflix.ministreaming.application.playback.dto.SavePlaybackProgressInput;
 import com.mininetflix.ministreaming.application.playback.port.PlaybackRepository;
 import com.mininetflix.ministreaming.domain.playback.PlaybackState;
+import com.mininetflix.ministreaming.infrastructure.statistics.event.VideoCompletedEvent;
+import com.mininetflix.ministreaming.infrastructure.statistics.publisher.VideoCompletedPublisher;
 
 @Service
 public class SavePlaybackProgressUseCaseImpl
@@ -13,12 +15,16 @@ public class SavePlaybackProgressUseCaseImpl
 
         private final PlaybackRepository playbackRepository;
         private final VideoCatalogRepository videoCatalogRepository;
+        private final VideoCompletedPublisher publisher;
 
         public SavePlaybackProgressUseCaseImpl(
                         PlaybackRepository playbackRepository,
-                        VideoCatalogRepository videoCatalogRepository) {
+                        VideoCatalogRepository videoCatalogRepository,
+                        VideoCompletedPublisher publisher) {
+
                 this.playbackRepository = playbackRepository;
                 this.videoCatalogRepository = videoCatalogRepository;
+                this.publisher = publisher;
         }
 
         @Override
@@ -31,19 +37,29 @@ public class SavePlaybackProgressUseCaseImpl
                 double officialDuration = video.getDuration();
 
                 PlaybackState state = playbackRepository
-                                .findByUserAndContent(input.userId(), input.contentId())
+                                .findByUserAndContent(
+                                                input.userId(),
+                                                input.contentId())
                                 .orElseGet(() -> new PlaybackState(
                                                 input.userId(),
                                                 input.contentId()));
+
+                boolean completedBefore = state.isCompleted();
 
                 state.updateProgress(
                                 input.currentTime(),
                                 officialDuration);
 
-                System.out.println("Official duration: " + officialDuration);
-                System.out.println("New time: " + input.currentTime());
-                System.out.println("Threshold: " + (officialDuration * 0.95));
                 playbackRepository.save(state);
-        }
 
+                if (!completedBefore &&
+                                state.isCompleted()) {
+
+                        publisher.publish(
+                                        new VideoCompletedEvent(
+                                                        input.userId(),
+                                                        input.contentId(),
+                                                        officialDuration));
+                }
+        }
 }

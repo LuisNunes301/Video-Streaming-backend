@@ -41,6 +41,7 @@ public class SecurityConfig {
                         .requestMatchers("/videos/**").authenticated()
                         .requestMatchers("/profiles/**").authenticated()
                         .requestMatchers("/playback/**").authenticated()
+                        .requestMatchers("/statistics/**").permitAll()
                         .requestMatchers("/home/**").authenticated()
                         .requestMatchers(
                                 "/v3/api-docs/**",

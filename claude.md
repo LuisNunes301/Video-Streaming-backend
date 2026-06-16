@@ -16,7 +16,7 @@ MiniStreaming é uma plataforma backend inspirada em Netflix, Prime Video e Disn
 * DDD
 * Event-Driven Architecture
 
-O objetivo do projeto é servir como um sistema realista de streaming moderno, focado em arquitetura escalável e boas práticas de engenharia de software.
+O objetivo do projeto é servir como um sistema realista de streaming moderno, focado em arquitetura escalável, desacoplamento entre contextos e boas práticas de engenharia de software.
 
 ---
 
@@ -24,64 +24,244 @@ O objetivo do projeto é servir como um sistema realista de streaming moderno, f
 
 ## Autenticação
 
+Implementado:
+
 * JWT Authentication
-* Roles (USER / ADMIN)
 * Spring Security
+* Roles USER e ADMIN
+* Filtros JWT customizados
+* Endpoints protegidos
+
+---
 
 ## Upload de Vídeos
+
+Implementado:
 
 * Upload assíncrono
 * RabbitMQ
 * Processamento via FFmpeg
+* Conversão para HLS
 * Armazenamento no MinIO
+* Geração automática de thumbnails
+
+Fluxo:
+
+Upload
+→ Evento RabbitMQ
+→ FFmpeg
+→ Thumbnail
+→ HLS
+→ Atualização do Catálogo
+
+---
 
 ## Catálogo
 
+Implementado:
+
 * Listagem de vídeos
-* Busca por título
+* Busca textual por título
 * Busca por categoria
-* Thumbnail pública
+* Consulta individual
+* Catálogo baseado em domínio
 
-## Playback
+Repositório:
 
-* Registro de reprodução
-* Controle de progresso
-* Histórico de visualização
+```java
+public interface VideoCatalogRepository {
+
+    void save(VideoContent video);
+
+    Optional<VideoContent> findById(String id);
+
+    List<VideoContent> findAll();
+
+    List<VideoContent> findByCategory(VideoCategory category);
+
+    List<VideoContent> searchByTitle(String query);
+
+}
+```
+
+---
+
+## Categorias Fortes
+
+Implementado através de enum de domínio:
+
+```java
+MUSIC
+DOCUMENTARY
+TECHNOLOGY
+EDUCATION
+SPORTS
+NEWS
+GAMING
+ENTERTAINMENT
+```
+
+Não existem categorias livres no banco.
+
+---
+
+## Thumbnail Pública
+
+Implementado.
+
+As thumbnails possuem URL pública gerada pelo MinIO.
+
+Exemplo:
+
+```text
+/videos/previews/{videoId}/thumbnail.jpg
+```
+
+---
 
 ## Perfil
 
-Separação entre:
+Estrutura atual:
 
+```text
 User
+└── UserProfile
+```
 
-e
+Separação concluída para permitir evolução futura para múltiplos perfis.
 
-UserProfile
-
-Permitindo evolução futura para múltiplos perfis.
+---
 
 ## Avatar
 
+Implementado.
+
+Funcionalidades:
+
+* Bucket dedicado
 * Upload para MinIO
-* Avatar associado ao perfil
-* URL persistida no banco
+* Persistência da URL
+* Associação ao UserProfile
+
+Endpoints:
+
+```http
+POST /profiles/avatar
+
+GET /profiles/me
+```
+
+---
 
 ## Favoritos
 
+Implementado.
+
 Cada perfil possui:
 
-* Lista de favoritos
 * Adição de favoritos
 * Remoção de favoritos
 * Consulta de favoritos
 
 Endpoints:
 
+```http
 POST /profiles/favorites/{videoId}
 
 DELETE /profiles/favorites/{videoId}
 
 GET /profiles/favorites
+```
+
+---
+
+## Playback
+
+Implementado.
+
+Funcionalidades:
+
+* Início de reprodução
+* Recuperação do progresso
+* Salvamento de progresso
+* Controle de conclusão
+* Continue Watching
+
+Endpoints:
+
+```http
+GET /playback/start/{contentId}
+
+POST /playback/progress
+
+GET /playback/{contentId}
+
+GET /playback/continue
+```
+
+---
+
+## Continue Watching Enriquecido
+
+Implementado.
+
+Retorna:
+
+* Video ID
+* Título
+* Thumbnail
+* Categoria
+* Duração
+* Tempo atual
+* Percentual assistido
+
+Exemplo:
+
+```json
+{
+  "videoId": "...",
+  "title": "...",
+  "thumbnailUrl": "...",
+  "duration": 109,
+  "currentTime": 10,
+  "progressPercent": 9,
+  "category": "SPORTS"
+}
+```
+
+Modelo semelhante ao utilizado pela Netflix.
+
+---
+
+## Home Netflix
+
+Implementado.
+
+Endpoint:
+
+```http
+GET /home
+```
+
+Retorna:
+
+* Trending
+* Continue Watching
+* Categorias
+
+Estrutura:
+
+```json
+{
+  "trending": [],
+  "continueWatching": [],
+  "categories": []
+}
+```
+
+Objetivo:
+
+Reduzir chamadas do frontend e fornecer uma única resposta agregada para a tela inicial.
 
 ---
 
@@ -93,7 +273,7 @@ GET /profiles/favorites
 
 Status:
 
-CONCLUÍDO
+✅ CONCLUÍDO
 
 ---
 
@@ -101,11 +281,9 @@ CONCLUÍDO
 
 ### Categorias Fortes
 
-VideoCategory como enum.
-
 Status:
 
-CONCLUÍDO
+✅ CONCLUÍDO
 
 ---
 
@@ -113,11 +291,9 @@ CONCLUÍDO
 
 ### Busca de Vídeos
 
-Busca textual por título.
-
 Status:
 
-CONCLUÍDO
+✅ CONCLUÍDO
 
 ---
 
@@ -125,75 +301,49 @@ CONCLUÍDO
 
 ### Separação User / UserProfile
 
-Estrutura preparada para evolução futura.
-
 Status:
 
-CONCLUÍDO
+✅ CONCLUÍDO
 
 ---
 
 ## Prioridade 5
 
-### Estatísticas de Consumo
-
-Métricas de visualização e progresso.
+### Favoritos
 
 Status:
 
-CONCLUÍDO
+✅ CONCLUÍDO
 
 ---
 
 ## Prioridade 6
 
-### Favoritos
-
-* Adicionar favorito
-* Remover favorito
-* Listar favoritos
+### Avatar via MinIO
 
 Status:
 
-CONCLUÍDO
+✅ CONCLUÍDO
 
 ---
 
 ## Prioridade 7
 
-### Avatar via MinIO
-
-* Bucket próprio
-* Upload
-* Persistência da URL
-* Integração com perfil
+### Continue Watching
 
 Status:
 
-CONCLUÍDO
+✅ CONCLUÍDO
 
 ---
 
-# Próximas Prioridades
-
 ## Prioridade 8
 
-### Histórico Completo
+### Continue Watching Enriquecido
 
-Objetivo:
+Status:
 
-Permitir que o usuário visualize tudo que assistiu.
-
-Endpoints previstos:
-
-GET /history
-
-Possíveis dados:
-
-* Vídeo
-* Data da visualização
-* Última posição
-* Tempo assistido
+✅ CONCLUÍDO
 
 ---
 
@@ -201,118 +351,59 @@ Possíveis dados:
 
 ### Home Netflix
 
-Endpoint agregador:
+Status:
 
-GET /home
-
-Retornando:
-
-* Trending
-* Continue Watching
-* Categorias
-* Recomendados
-* Últimos adicionados
-
-Objetivo:
-
-Reduzir múltiplas chamadas do frontend.
+✅ CONCLUÍDO
 
 ---
 
+# Próximas Prioridades
+
 ## Prioridade 10
 
-### Continue Watching Enriquecido
+### Estatísticas de Consumo
 
-Atualmente existe playback.
+Objetivo:
 
-A evolução consiste em retornar:
+Registrar métricas reais de uso da plataforma.
 
-* Thumbnail
-* Título
-* Categoria
-* Percentual assistido
-* Duração
-* Tempo restante
+Métricas previstas:
 
-Experiência semelhante à Netflix.
+* Total de visualizações
+* Horas assistidas
+* Vídeos mais vistos
+* Categorias mais consumidas
+* Usuários ativos
+
+Essa funcionalidade servirá como base para:
+
+* Trending real
+* Dashboard administrativo
+* Recomendações
 
 ---
 
 ## Prioridade 11
 
-### Múltiplos Perfis
-
-Evolução do modelo atual.
-
-Hoje:
-
-User
-└── UserProfile
-
-Futuro:
-
-User
-├── Profile 1
-├── Profile 2
-├── Profile 3
-└── Profile 4
-
-Cada perfil possuirá:
-
-* Histórico próprio
-* Favoritos próprios
-* Continue Watching próprio
-* Recomendações próprias
-
----
-
-## Prioridade 12
-
-### Controle Parental
+### Trending Inteligente
 
 Dependência:
 
-Prioridade 11
+Prioridade 10
 
-Recursos previstos:
+Hoje:
 
-* Perfil Infantil
-* Restrição por classificação indicativa
-* Limite de idade
-* Bloqueio de conteúdo adulto
+```text
+Trending = vídeos mais recentes
+```
 
-Exemplo:
+Futuro:
 
-KIDS
+```text
+Trending = vídeos mais assistidos
+```
 
-Permite apenas:
-
-* Livre
-* 10 anos
-
-ADULT
-
-Permite:
-
-* Todo catálogo
-
----
-
-# Evoluções Futuras (Longo Prazo)
-
-## Recomendações
-
-Motor de recomendação baseado em:
-
-* Histórico
-* Favoritos
-* Categorias assistidas
-
----
-
-## Trending Inteligente
-
-Vídeos populares por:
+Critérios:
 
 * Dia
 * Semana
@@ -320,23 +411,75 @@ Vídeos populares por:
 
 ---
 
-## Sistema de Avaliações
+## Prioridade 12
 
-Curtir / Não Curtir
+### Múltiplos Perfis
 
-ou
+Evolução da estrutura atual.
 
-Avaliação por estrelas.
+Hoje:
+
+```text
+User
+└── UserProfile
+```
+
+Futuro:
+
+```text
+User
+├── Profile 1
+├── Profile 2
+├── Profile 3
+└── Profile 4
+```
+
+Cada perfil possuirá:
+
+* Continue Watching próprio
+* Favoritos próprios
+* Histórico próprio
+* Recomendações próprias
 
 ---
 
-## Notificações
+## Prioridade 13
 
-Integração via RabbitMQ para:
+### Controle Parental
 
-* Novo vídeo
-* Vídeo processado
-* Recomendações
+Dependência:
+
+Prioridade 12
+
+Funcionalidades:
+
+* Perfil infantil
+* Restrição etária
+* Classificação indicativa
+* Catálogo filtrado
+
+Exemplo:
+
+```text
+KIDS
+→ Livre
+→ 10 anos
+
+ADULT
+→ Todo catálogo
+```
+
+---
+
+# Evoluções Futuras
+
+## Recomendações
+
+Baseadas em:
+
+* Histórico
+* Favoritos
+* Categorias consumidas
 
 ---
 
@@ -344,10 +487,45 @@ Integração via RabbitMQ para:
 
 Métricas:
 
-* Vídeos enviados
+* Uploads
+* Vídeos processados
 * Vídeos assistidos
+* Horas consumidas
 * Usuários ativos
-* Tempo médio de visualização
+
+---
+
+## Avaliações
+
+Implementar:
+
+* Like
+* Dislike
+
+ou
+
+* Sistema de estrelas
+
+---
+
+## Notificações
+
+RabbitMQ:
+
+* Novo vídeo
+* Vídeo processado
+* Recomendações
+
+---
+
+## Busca Avançada
+
+Filtros:
+
+* Categoria
+* Popularidade
+* Data
+* Duração
 
 ---
 
@@ -357,9 +535,13 @@ Construir uma plataforma de streaming inspirada em arquiteturas utilizadas por N
 
 * Clean Architecture
 * DDD
-* Event-Driven
-* Mensageria
-* Cloud Storage
-* Processamento Assíncrono
+* Event-Driven Architecture
+* RabbitMQ
+* MinIO
+* Processamento assíncrono
+* HLS Streaming
 * Escalabilidade
+* Observabilidade
 * Boas práticas de backend moderno
+
+Com foco em servir como projeto de portfólio profissional e demonstrar competências avançadas em backend distribuído.
