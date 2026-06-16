@@ -19,10 +19,6 @@ public class VideoCompletedConsumer {
     public void consume(
             VideoCompletedEvent event) {
 
-        System.out.println(
-                "CONSUMINDO EVENTO VIDEO COMPLETED -> "
-                        + event.videoId());
-
         useCase.execute(event);
     }
 }

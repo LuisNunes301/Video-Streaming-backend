@@ -26,6 +26,9 @@ public class PlaybackEntity {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
+    @Column(nullable = false)
+    private boolean completionRegistered;
+
     public UUID getId() {
         return id;
     }
@@ -74,4 +77,13 @@ public class PlaybackEntity {
         this.updatedAt = updatedAt;
     }
 
+    public boolean isCompletionRegistered() {
+        return completionRegistered;
+    }
+
+    public void setCompletionRegistered(
+            boolean completionRegistered) {
+
+        this.completionRegistered = completionRegistered;
+    }
 }

@@ -16,14 +16,21 @@ public class PlaybackState {
 
     private double currentTime;
     private boolean completed;
+    private boolean completionRegistered;
 
     private Instant lastUpdated;
 
     public PlaybackState(String userId, String contentId) {
+
         this.userId = userId;
         this.contentId = contentId;
+
         this.currentTime = 0.0;
+
         this.completed = false;
+
+        this.completionRegistered = false;
+
         this.lastUpdated = Instant.now();
     }
 

@@ -51,8 +51,6 @@ public class MinioBucketConfig {
                                                         .bucket(bucketName)
                                                         .build());
 
-                        System.out.println(
-                                        "Bucket criado: " + bucketName);
                 }
         }
 }

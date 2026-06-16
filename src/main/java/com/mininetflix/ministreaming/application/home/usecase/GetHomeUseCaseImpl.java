@@ -2,9 +2,7 @@ package com.mininetflix.ministreaming.application.home.usecase;
 
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 import org.springframework.stereotype.Service;
@@ -28,6 +26,7 @@ public class GetHomeUseCaseImpl implements GetHomeUseCase {
         private final VideoCatalogRepository videoRepository;
         private final PlaybackRepository playbackRepository;
         private final VideoStorageService videoStorageService;
+        private final GetTrendingVideosUseCase trendingUseCase;
 
         @Override
         public HomeResponse execute(String userId) {
@@ -46,15 +45,14 @@ public class GetHomeUseCaseImpl implements GetHomeUseCase {
 
         private List<VideoSummaryResponse> buildTrending() {
 
-                return videoRepository.findAll()
+                return trendingUseCase.execute()
                                 .stream()
-                                .filter(VideoContent::isActive)
-                                .sorted(
-                                                Comparator.comparing(
-                                                                VideoContent::getCreatedAt,
-                                                                Comparator.reverseOrder()))
-                                .limit(20)
-                                .map(this::toSummary)
+                                .map(video -> new VideoSummaryResponse(
+                                                video.videoId(),
+                                                video.title(),
+                                                video.thumbnailUrl(),
+                                                video.duration(),
+                                                video.category()))
                                 .toList();
         }
 

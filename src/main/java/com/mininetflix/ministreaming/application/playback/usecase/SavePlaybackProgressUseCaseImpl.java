@@ -28,11 +28,13 @@ public class SavePlaybackProgressUseCaseImpl
         }
 
         @Override
-        public void execute(SavePlaybackProgressInput input) {
+        public void execute(
+                        SavePlaybackProgressInput input) {
 
                 var video = videoCatalogRepository
                                 .findById(input.contentId())
-                                .orElseThrow(() -> new IllegalArgumentException("Video not found"));
+                                .orElseThrow(() -> new IllegalArgumentException(
+                                                "Video not found"));
 
                 double officialDuration = video.getDuration();
 
@@ -44,22 +46,22 @@ public class SavePlaybackProgressUseCaseImpl
                                                 input.userId(),
                                                 input.contentId()));
 
-                boolean completedBefore = state.isCompleted();
-
                 state.updateProgress(
                                 input.currentTime(),
                                 officialDuration);
 
-                playbackRepository.save(state);
-
-                if (!completedBefore &&
-                                state.isCompleted()) {
+                if (state.isCompleted()
+                                && !state.isCompletionRegistered()) {
 
                         publisher.publish(
                                         new VideoCompletedEvent(
                                                         input.userId(),
                                                         input.contentId(),
                                                         officialDuration));
+
+                        state.setCompletionRegistered(true);
                 }
+
+                playbackRepository.save(state);
         }
 }

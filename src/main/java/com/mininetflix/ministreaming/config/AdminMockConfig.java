@@ -43,7 +43,6 @@ public class AdminMockConfig {
 
             profileRepository.save(profile);
 
-            System.out.println("ADMIN criado com sucesso!");
         };
     }
 }

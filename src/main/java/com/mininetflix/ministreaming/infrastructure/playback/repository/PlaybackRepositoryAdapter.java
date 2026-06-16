@@ -60,6 +60,7 @@ public class PlaybackRepositoryAdapter implements PlaybackRepository {
                 entity.setContentId(UUID.fromString(state.getContentId()));
                 entity.setCurrentTime(state.getCurrentTime());
                 entity.setCompleted(state.isCompleted());
+                entity.setCompletionRegistered(state.isCompletionRegistered());
                 entity.setUpdatedAt(
                                 state.getLastUpdated() != null
                                                 ? LocalDateTime.ofInstant(
@@ -78,6 +79,7 @@ public class PlaybackRepositoryAdapter implements PlaybackRepository {
 
                 state.setCurrentTime(entity.getCurrentTime());
                 state.setCompleted(entity.isCompleted());
+                state.setCompletionRegistered(entity.isCompletionRegistered());
                 state.setLastUpdated(
                                 entity.getUpdatedAt()
                                                 .atZone(ZoneId.systemDefault())

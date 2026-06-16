@@ -23,8 +23,6 @@ public class ProcessVideoUseCaseImpl implements ProcessVideoUseCase {
     @Override
     public void execute(VideoUploadedEvent event) {
 
-        System.out.println(">>> PROCESSANDO VIDEO: " + event.videoId());
-
         var video = repository.findById(event.videoId())
                 .orElseThrow(() -> new IllegalStateException("Video not found"));
 

@@ -96,8 +96,6 @@ public class UserProfileController {
                         Authentication authentication,
                         @PathVariable String videoId) {
 
-                System.out.println("DELETE FAVORITE HIT");
-
                 UUID userId = UUID.fromString(authentication.getName());
 
                 removeFavoriteUseCase.execute(
