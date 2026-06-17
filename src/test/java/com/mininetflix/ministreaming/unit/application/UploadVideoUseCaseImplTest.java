@@ -7,7 +7,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-
 import org.springframework.mock.web.MockMultipartFile;
 
 import com.mininetflix.ministreaming.application.content.dto.UploadVideoInput;
@@ -15,7 +14,7 @@ import com.mininetflix.ministreaming.application.content.dto.UploadVideoOutput;
 import com.mininetflix.ministreaming.application.content.port.DomainEventPublisher;
 import com.mininetflix.ministreaming.application.content.port.VideoCatalogRepository;
 import com.mininetflix.ministreaming.application.content.port.VideoStorageService;
-import com.mininetflix.ministreaming.application.content.usecase.UploadVideoUseCase;
+import com.mininetflix.ministreaming.application.content.usecase.UploadVideoUseCaseImpl;
 import com.mininetflix.ministreaming.domain.content.VideoCategory;
 import com.mininetflix.ministreaming.domain.content.VideoContent;
 import com.mininetflix.ministreaming.domain.content.event.VideoUploadedEvent;
@@ -33,7 +32,7 @@ class UploadVideoUseCaseImplTest {
         private DomainEventPublisher eventPublisher;
 
         @InjectMocks
-        private UploadVideoUseCase useCase;
+        private UploadVideoUseCaseImpl useCase;
 
         @Test
         void shouldUploadVideoSuccessfully() {
