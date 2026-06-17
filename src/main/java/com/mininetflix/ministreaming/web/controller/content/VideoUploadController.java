@@ -1,6 +1,5 @@
 package com.mininetflix.ministreaming.web.controller.content;
 
-import com.mininetflix.ministreaming.application.content.usecase.SearchVideosUseCaseImpl;
 import java.util.List;
 
 import org.springframework.http.MediaType;
@@ -16,14 +15,12 @@ import org.springframework.web.multipart.MultipartFile;
 import com.mininetflix.ministreaming.application.content.dto.UploadVideoInput;
 import com.mininetflix.ministreaming.application.content.dto.UploadVideoOutput;
 import com.mininetflix.ministreaming.application.content.dto.VideoResponse;
-import com.mininetflix.ministreaming.application.content.port.VideoCatalogRepository;
 import com.mininetflix.ministreaming.application.content.usecase.GetVideoByIdUseCase;
 import com.mininetflix.ministreaming.application.content.usecase.ListVideosByCategoryUseCase;
 import com.mininetflix.ministreaming.application.content.usecase.ListVideosUseCase;
 import com.mininetflix.ministreaming.application.content.usecase.SearchVideosUseCase;
 import com.mininetflix.ministreaming.application.content.usecase.UploadVideoUseCase;
 import com.mininetflix.ministreaming.domain.content.VideoCategory;
-import com.mininetflix.ministreaming.domain.content.VideoContent;
 
 @RestController
 @RequestMapping("/videos")
@@ -39,7 +36,7 @@ public class VideoUploadController {
                         UploadVideoUseCase uploadVideoUseCase,
                         GetVideoByIdUseCase getVideoByIdUseCase,
                         ListVideosUseCase listVideoUseCase, ListVideosByCategoryUseCase listVideosByCategoryUseCase,
-                        SearchVideosUseCase searchVideosUseCase, SearchVideosUseCaseImpl searchVideosUseCaseImpl) {
+                        SearchVideosUseCase searchVideosUseCase) {
 
                 this.uploadVideoUseCase = uploadVideoUseCase;
                 this.getVideoByIdUseCase = getVideoByIdUseCase;

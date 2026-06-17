@@ -3,6 +3,10 @@ package com.mininetflix.ministreaming.unit.auth;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.time.LocalDateTime;
+import java.util.Set;
+import java.util.UUID;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -15,119 +19,147 @@ import com.mininetflix.ministreaming.application.user.dto.RegisterUserInput;
 import com.mininetflix.ministreaming.application.user.port.PasswordEncoder;
 import com.mininetflix.ministreaming.application.user.port.UserRepository;
 import com.mininetflix.ministreaming.application.user.usecase.RegisterUserUseCaseImpl;
+import com.mininetflix.ministreaming.application.userprofile.port.UserProfileRepository;
 import com.mininetflix.ministreaming.domain.user.User;
+import com.mininetflix.ministreaming.domain.user.UserRole;
 import com.mininetflix.ministreaming.domain.user.exception.EmailAlreadyExistsException;
 import com.mininetflix.ministreaming.domain.user.exception.NameAlreadyExistsExecption;
 
 @ExtendWith(MockitoExtension.class)
 public class RegisterUserUseCaseImplTest {
-    @Mock
-    private UserRepository userRepository;
+        @Mock
+        private UserRepository userRepository;
 
-    @Mock
-    private PasswordEncoder passwordEncoder;
+        @Mock
+        private PasswordEncoder passwordEncoder;
 
-    @InjectMocks
-    private RegisterUserUseCaseImpl useCase;
+        @InjectMocks
+        private RegisterUserUseCaseImpl useCase;
+        @Mock
+        private UserProfileRepository userProfileRepository;
 
-    @Test
-    void shouldRegisterUserSuccessfully() {
+        @Test
+        void shouldRegisterUserSuccessfully() {
 
-        RegisterUserInput input = new RegisterUserInput(
-                "Luis",
-                "luis@email.com",
-                "123456");
+                RegisterUserInput input = new RegisterUserInput(
+                                "Luis",
+                                "luis@email.com",
+                                "123456");
 
-        Mockito.when(userRepository.existsByEmail(input.email()))
-                .thenReturn(false);
+                Mockito.when(userRepository.existsByEmail(input.email()))
+                                .thenReturn(false);
 
-        Mockito.when(userRepository.existsByName(input.name()))
-                .thenReturn(false);
+                Mockito.when(userRepository.existsByName(input.name()))
+                                .thenReturn(false);
 
-        Mockito.when(passwordEncoder.encode("123456"))
-                .thenReturn("hashed-password");
+                Mockito.when(passwordEncoder.encode("123456"))
+                                .thenReturn("hashed-password");
 
-        useCase.execute(input);
+                User persistedUser = new User(
+                                UUID.randomUUID(),
+                                "Luis",
+                                "luis@email.com",
+                                "hashed-password",
+                                LocalDateTime.now(),
+                                LocalDateTime.now(),
+                                Set.of(UserRole.USER));
 
-        Mockito.verify(passwordEncoder)
-                .encode("123456");
+                Mockito.when(userRepository.save(Mockito.any(User.class)))
+                                .thenReturn(persistedUser);
 
-        Mockito.verify(userRepository)
-                .save(Mockito.any(User.class));
-    }
+                useCase.execute(input);
 
-    @Test
-    void shouldThrowExceptionWhenEmailAlreadyExists() {
+                Mockito.verify(passwordEncoder)
+                                .encode("123456");
 
-        RegisterUserInput input = new RegisterUserInput(
-                "Luis",
-                "luis@email.com",
-                "123456");
+                Mockito.verify(userRepository)
+                                .save(Mockito.any(User.class));
+        }
 
-        Mockito.when(userRepository.existsByEmail(input.email()))
-                .thenReturn(true);
+        @Test
+        void shouldThrowExceptionWhenEmailAlreadyExists() {
 
-        assertThrows(
-                EmailAlreadyExistsException.class,
-                () -> useCase.execute(input));
+                RegisterUserInput input = new RegisterUserInput(
+                                "Luis",
+                                "luis@email.com",
+                                "123456");
 
-        Mockito.verify(userRepository, Mockito.never())
-                .save(Mockito.any());
+                Mockito.when(userRepository.existsByEmail(input.email()))
+                                .thenReturn(true);
 
-        Mockito.verify(passwordEncoder, Mockito.never())
-                .encode(Mockito.anyString());
-    }
+                assertThrows(
+                                EmailAlreadyExistsException.class,
+                                () -> useCase.execute(input));
 
-    @Test
-    void shouldThrowExceptionWhenNameAlreadyExists() {
+                Mockito.verify(userRepository, Mockito.never())
+                                .save(Mockito.any());
 
-        RegisterUserInput input = new RegisterUserInput(
-                "Luis",
-                "luis@email.com",
-                "123456");
+                Mockito.verify(passwordEncoder, Mockito.never())
+                                .encode(Mockito.anyString());
+        }
 
-        Mockito.when(userRepository.existsByEmail(input.email()))
-                .thenReturn(false);
+        @Test
+        void shouldThrowExceptionWhenNameAlreadyExists() {
 
-        Mockito.when(userRepository.existsByName(input.name()))
-                .thenReturn(true);
+                RegisterUserInput input = new RegisterUserInput(
+                                "Luis",
+                                "luis@email.com",
+                                "123456");
 
-        assertThrows(
-                NameAlreadyExistsExecption.class,
-                () -> useCase.execute(input));
+                Mockito.when(userRepository.existsByEmail(input.email()))
+                                .thenReturn(false);
 
-        Mockito.verify(userRepository, Mockito.never())
-                .save(Mockito.any());
-    }
+                Mockito.when(userRepository.existsByName(input.name()))
+                                .thenReturn(true);
 
-    @Test
-    void shouldSaveEncodedPassword() {
+                assertThrows(
+                                NameAlreadyExistsExecption.class,
+                                () -> useCase.execute(input));
 
-        RegisterUserInput input = new RegisterUserInput(
-                "Luis",
-                "luis@email.com",
-                "123456");
+                Mockito.verify(userRepository, Mockito.never())
+                                .save(Mockito.any());
+        }
 
-        Mockito.when(userRepository.existsByEmail(input.email()))
-                .thenReturn(false);
+        @Test
+        void shouldSaveEncodedPassword() {
 
-        Mockito.when(userRepository.existsByName(input.name()))
-                .thenReturn(false);
+                RegisterUserInput input = new RegisterUserInput(
+                                "Luis",
+                                "luis@email.com",
+                                "123456");
 
-        Mockito.when(passwordEncoder.encode("123456"))
-                .thenReturn("HASHED");
+                Mockito.when(userRepository.existsByEmail(input.email()))
+                                .thenReturn(false);
 
-        useCase.execute(input);
+                Mockito.when(userRepository.existsByName(input.name()))
+                                .thenReturn(false);
 
-        ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
+                Mockito.when(passwordEncoder.encode("123456"))
+                                .thenReturn("HASHED");
 
-        Mockito.verify(userRepository)
-                .save(captor.capture());
+                User persistedUser = new User(
+                                UUID.randomUUID(),
+                                "Luis",
+                                "luis@email.com",
+                                "HASHED",
+                                LocalDateTime.now(),
+                                LocalDateTime.now(),
+                                Set.of(UserRole.USER));
 
-        User savedUser = captor.getValue();
+                Mockito.when(userRepository.save(Mockito.any(User.class)))
+                                .thenReturn(persistedUser);
 
-        assertEquals("Luis", savedUser.getName());
-        assertEquals("luis@email.com", savedUser.getEmail());
-        assertEquals("HASHED", savedUser.getPasswordHash());
-    }
+                useCase.execute(input);
+
+                ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
+
+                Mockito.verify(userRepository)
+                                .save(captor.capture());
+
+                User capturedUser = captor.getValue();
+
+                assertEquals("Luis", capturedUser.getName());
+                assertEquals("luis@email.com", capturedUser.getEmail());
+                assertEquals("HASHED", capturedUser.getPasswordHash());
+        }
 }

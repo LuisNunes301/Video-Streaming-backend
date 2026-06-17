@@ -15,7 +15,7 @@ import com.mininetflix.ministreaming.application.content.dto.UploadVideoOutput;
 import com.mininetflix.ministreaming.application.content.port.DomainEventPublisher;
 import com.mininetflix.ministreaming.application.content.port.VideoCatalogRepository;
 import com.mininetflix.ministreaming.application.content.port.VideoStorageService;
-import com.mininetflix.ministreaming.application.content.usecase.UploadVideoUseCaseImpl;
+import com.mininetflix.ministreaming.application.content.usecase.UploadVideoUseCase;
 import com.mininetflix.ministreaming.domain.content.VideoCategory;
 import com.mininetflix.ministreaming.domain.content.VideoContent;
 import com.mininetflix.ministreaming.domain.content.event.VideoUploadedEvent;
@@ -33,7 +33,7 @@ class UploadVideoUseCaseImplTest {
         private DomainEventPublisher eventPublisher;
 
         @InjectMocks
-        private UploadVideoUseCaseImpl useCase;
+        private UploadVideoUseCase useCase;
 
         @Test
         void shouldUploadVideoSuccessfully() {
