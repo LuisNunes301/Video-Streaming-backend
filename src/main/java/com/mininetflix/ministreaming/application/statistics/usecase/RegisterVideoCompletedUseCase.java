@@ -4,6 +4,5 @@ import com.mininetflix.ministreaming.infrastructure.statistics.event.VideoComple
 
 public interface RegisterVideoCompletedUseCase {
 
-    void execute(
-            VideoCompletedEvent event);
+  void execute(VideoCompletedEvent event);
 }

@@ -5,51 +5,45 @@ import lombok.Getter;
 @Getter
 public class VideoStatistics {
 
-    private String videoId;
+  private String videoId;
 
-    private long views;
+  private long views;
 
-    private long completedViews;
+  private long completedViews;
 
-    private double watchedSeconds;
+  private double watchedSeconds;
 
-    private VideoStatistics() {
-    }
+  private VideoStatistics() {}
 
-    public static VideoStatistics create(
-            String videoId) {
+  public static VideoStatistics create(String videoId) {
 
-        VideoStatistics statistics = new VideoStatistics();
+    VideoStatistics statistics = new VideoStatistics();
 
-        statistics.videoId = videoId;
-        statistics.views = 0;
-        statistics.completedViews = 0;
-        statistics.watchedSeconds = 0;
+    statistics.videoId = videoId;
+    statistics.views = 0;
+    statistics.completedViews = 0;
+    statistics.watchedSeconds = 0;
 
-        return statistics;
-    }
+    return statistics;
+  }
 
-    public static VideoStatistics restore(
-            String videoId,
-            long views,
-            long completedViews,
-            double watchedSeconds) {
+  public static VideoStatistics restore(
+      String videoId, long views, long completedViews, double watchedSeconds) {
 
-        VideoStatistics statistics = new VideoStatistics();
+    VideoStatistics statistics = new VideoStatistics();
 
-        statistics.videoId = videoId;
-        statistics.views = views;
-        statistics.completedViews = completedViews;
-        statistics.watchedSeconds = watchedSeconds;
+    statistics.videoId = videoId;
+    statistics.views = views;
+    statistics.completedViews = completedViews;
+    statistics.watchedSeconds = watchedSeconds;
 
-        return statistics;
-    }
+    return statistics;
+  }
 
-    public void registerCompletedView(
-            double watchedSeconds) {
+  public void registerCompletedView(double watchedSeconds) {
 
-        this.views++;
-        this.completedViews++;
-        this.watchedSeconds += watchedSeconds;
-    }
+    this.views++;
+    this.completedViews++;
+    this.watchedSeconds += watchedSeconds;
+  }
 }

@@ -1,42 +1,32 @@
 package com.mininetflix.ministreaming.application.userprofile.usecase;
 
-import java.util.UUID;
-
-import org.springframework.stereotype.Service;
-
 import com.mininetflix.ministreaming.application.userprofile.dto.UpdateProfileRequest;
 import com.mininetflix.ministreaming.application.userprofile.port.UserProfileRepository;
 import com.mininetflix.ministreaming.domain.userprofile.UserProfile;
 import com.mininetflix.ministreaming.web.controller.profile.dto.UserProfileResponse;
-
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class UpdateProfileUseCaseImpl
-                implements UpdateProfileUseCase {
+public class UpdateProfileUseCaseImpl implements UpdateProfileUseCase {
 
-        private final UserProfileRepository repository;
+  private final UserProfileRepository repository;
 
-        @Override
-        public UserProfileResponse execute(
-                        UUID userId,
-                        UpdateProfileRequest request) {
+  @Override
+  public UserProfileResponse execute(UUID userId, UpdateProfileRequest request) {
 
-                UserProfile profile = repository
-                                .findByUserId(userId)
-                                .orElseThrow(() -> new RuntimeException("Profile not found"));
+    UserProfile profile =
+        repository
+            .findByUserId(userId)
+            .orElseThrow(() -> new RuntimeException("Profile not found"));
 
-                profile.updateProfile(
-                                request.nickname(),
-                                request.bio());
+    profile.updateProfile(request.nickname(), request.bio());
 
-                UserProfile saved = repository.save(profile);
+    UserProfile saved = repository.save(profile);
 
-                return new UserProfileResponse(
-                                saved.getUserId(),
-                                saved.getNickname(),
-                                saved.getAvatarKey(),
-                                saved.getBio());
-        }
+    return new UserProfileResponse(
+        saved.getUserId(), saved.getNickname(), saved.getAvatarKey(), saved.getBio());
+  }
 }

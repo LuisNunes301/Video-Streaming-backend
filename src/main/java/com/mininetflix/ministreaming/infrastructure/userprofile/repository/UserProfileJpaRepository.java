@@ -1,15 +1,11 @@
 package com.mininetflix.ministreaming.infrastructure.userprofile.repository;
 
+import com.mininetflix.ministreaming.infrastructure.userprofile.entity.UserProfileEntity;
 import java.util.Optional;
 import java.util.UUID;
-
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.mininetflix.ministreaming.infrastructure.userprofile.entity.UserProfileEntity;
+public interface UserProfileJpaRepository extends JpaRepository<UserProfileEntity, UUID> {
 
-public interface UserProfileJpaRepository
-        extends JpaRepository<UserProfileEntity, UUID> {
-
-    Optional<UserProfileEntity> findByUserId(UUID userId);
-
+  Optional<UserProfileEntity> findByUserId(UUID userId);
 }

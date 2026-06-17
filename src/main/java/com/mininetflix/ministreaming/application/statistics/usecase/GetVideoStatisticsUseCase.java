@@ -4,6 +4,5 @@ import com.mininetflix.ministreaming.application.statistics.dto.VideoStatisticsR
 
 public interface GetVideoStatisticsUseCase {
 
-    VideoStatisticsResponse execute(
-            String videoId);
+  VideoStatisticsResponse execute(String videoId);
 }

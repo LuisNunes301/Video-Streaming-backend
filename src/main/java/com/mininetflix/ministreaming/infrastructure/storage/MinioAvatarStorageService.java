@@ -1,42 +1,32 @@
 package com.mininetflix.ministreaming.infrastructure.storage;
 
-import java.util.UUID;
-
-import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
-
 import com.mininetflix.ministreaming.application.storage.StorageBucketEnum;
 import com.mininetflix.ministreaming.application.storage.StorageService;
 import com.mininetflix.ministreaming.application.userprofile.port.AvatarStorageService;
-
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
-public class MinioAvatarStorageService
-                implements AvatarStorageService {
+public class MinioAvatarStorageService implements AvatarStorageService {
 
-        private final StorageService storageService;
+  private final StorageService storageService;
 
-        @Override
-        public String uploadAvatar(MultipartFile file) {
+  @Override
+  public String uploadAvatar(MultipartFile file) {
 
-                String avatarKey = UUID.randomUUID() + "-"
-                                + file.getOriginalFilename();
+    String avatarKey = UUID.randomUUID() + "-" + file.getOriginalFilename();
 
-                storageService.upload(
-                                StorageBucketEnum.AVATARS,
-                                avatarKey,
-                                file);
+    storageService.upload(StorageBucketEnum.AVATARS, avatarKey, file);
 
-                return avatarKey;
-        }
+    return avatarKey;
+  }
 
-        @Override
-        public void deleteAvatar(String avatarKey) {
+  @Override
+  public void deleteAvatar(String avatarKey) {
 
-                storageService.delete(
-                                StorageBucketEnum.AVATARS,
-                                avatarKey);
-        }
+    storageService.delete(StorageBucketEnum.AVATARS, avatarKey);
+  }
 }

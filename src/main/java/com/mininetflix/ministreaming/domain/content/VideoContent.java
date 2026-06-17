@@ -4,195 +4,188 @@ import java.time.Instant;
 
 public class VideoContent {
 
-    private String id;
-    private String title;
+  private String id;
+  private String title;
 
-    private String objectKey;
+  private String objectKey;
 
-    private VideoStatus status;
-    private VideoCategory category;
-    private Double duration;
-    private Long size;
-    private Integer width;
-    private Integer height;
+  private VideoStatus status;
+  private VideoCategory category;
+  private Double duration;
+  private Long size;
+  private Integer width;
+  private Integer height;
 
-    private String thumbnailKey;
-    private String hlsPlaylistKey;
+  private String thumbnailKey;
+  private String hlsPlaylistKey;
 
-    private String processingError;
+  private String processingError;
 
-    private Instant createdAt;
-    private Instant processedAt;
+  private Instant createdAt;
+  private Instant processedAt;
 
-    private VideoContent() {
+  private VideoContent() {}
+
+  public static VideoContent create(
+      String id, String title, VideoCategory category, String objectKey) {
+
+    VideoContent video = new VideoContent();
+    video.id = id;
+    video.title = title;
+    video.objectKey = objectKey;
+    video.status = VideoStatus.UPLOADING;
+    video.category = category;
+    video.createdAt = Instant.now();
+
+    return video;
+  }
+
+  public static VideoContent restore(
+      String id,
+      String title,
+      String objectKey,
+      VideoStatus status,
+      Double duration,
+      Long size,
+      Integer width,
+      Integer height,
+      VideoCategory category,
+      String thumbnailKey,
+      String hlsPlaylistKey,
+      String processingError,
+      Instant createdAt,
+      Instant processedAt) {
+
+    VideoContent video = new VideoContent();
+    video.id = id;
+    video.title = title;
+    video.objectKey = objectKey;
+    video.status = status;
+    video.duration = duration;
+    video.width = width;
+    video.height = height;
+    video.size = size;
+    video.thumbnailKey = thumbnailKey;
+    video.category = category;
+    video.hlsPlaylistKey = hlsPlaylistKey;
+    video.processingError = processingError;
+    video.createdAt = createdAt;
+    video.processedAt = processedAt;
+
+    return video;
+  }
+
+  public void markProcessing() {
+    if (this.status == VideoStatus.PROCESSING) {
+      return;
     }
 
-    public static VideoContent create(
-            String id,
-            String title,
-            VideoCategory category,
-            String objectKey) {
-
-        VideoContent video = new VideoContent();
-        video.id = id;
-        video.title = title;
-        video.objectKey = objectKey;
-        video.status = VideoStatus.UPLOADING;
-        video.category = category;
-        video.createdAt = Instant.now();
-
-        return video;
+    if (this.status != VideoStatus.UPLOADING) {
+      throw new IllegalStateException("Video can only move to PROCESSING from UPLOADING");
     }
 
-    public static VideoContent restore(
-            String id,
-            String title,
-            String objectKey,
-            VideoStatus status,
-            Double duration,
-            Long size,
-            Integer width,
-            Integer height,
-            VideoCategory category,
-            String thumbnailKey,
-            String hlsPlaylistKey,
-            String processingError,
-            Instant createdAt,
-            Instant processedAt) {
+    this.status = VideoStatus.PROCESSING;
+  }
 
-        VideoContent video = new VideoContent();
-        video.id = id;
-        video.title = title;
-        video.objectKey = objectKey;
-        video.status = status;
-        video.duration = duration;
-        video.width = width;
-        video.height = height;
-        video.size = size;
-        video.thumbnailKey = thumbnailKey;
-        video.category = category;
-        video.hlsPlaylistKey = hlsPlaylistKey;
-        video.processingError = processingError;
-        video.createdAt = createdAt;
-        video.processedAt = processedAt;
+  public void markReady(
+      Double duration,
+      Long size,
+      Integer width,
+      Integer height,
+      String thumbnailKey,
+      String hlsPlaylistKey) {
 
-        return video;
+    if (this.status != VideoStatus.PROCESSING) {
+      throw new IllegalStateException("Video can only move to READY from PROCESSING");
     }
 
-    public void markProcessing() {
-        if (this.status == VideoStatus.PROCESSING) {
-            return;
-        }
+    this.duration = duration;
+    this.size = size;
+    this.width = width;
+    this.height = height;
+    this.thumbnailKey = thumbnailKey;
+    this.hlsPlaylistKey = hlsPlaylistKey;
+    this.processingError = null;
 
-        if (this.status != VideoStatus.UPLOADING) {
-            throw new IllegalStateException(
-                    "Video can only move to PROCESSING from UPLOADING");
-        }
+    this.status = VideoStatus.READY;
+    this.processedAt = Instant.now();
+  }
 
-        this.status = VideoStatus.PROCESSING;
+  public void markFailed(String error) {
+    if (this.status != VideoStatus.PROCESSING) {
+      throw new IllegalStateException("Video can only FAIL from PROCESSING");
     }
 
-    public void markReady(
-            Double duration,
-            Long size,
-            Integer width,
-            Integer height,
-            String thumbnailKey,
-            String hlsPlaylistKey) {
+    this.status = VideoStatus.FAILED;
+    this.processingError = error;
+    this.processedAt = Instant.now();
+  }
 
-        if (this.status != VideoStatus.PROCESSING) {
-            throw new IllegalStateException(
-                    "Video can only move to READY from PROCESSING");
-        }
+  public boolean isActive() {
+    return this.status == VideoStatus.READY;
+  }
 
-        this.duration = duration;
-        this.size = size;
-        this.width = width;
-        this.height = height;
-        this.thumbnailKey = thumbnailKey;
-        this.hlsPlaylistKey = hlsPlaylistKey;
-        this.processingError = null;
+  public boolean isProcessing() {
+    return this.status == VideoStatus.PROCESSING;
+  }
 
-        this.status = VideoStatus.READY;
-        this.processedAt = Instant.now();
-    }
+  public boolean isFailed() {
+    return this.status == VideoStatus.FAILED;
+  }
 
-    public void markFailed(String error) {
-        if (this.status != VideoStatus.PROCESSING) {
-            throw new IllegalStateException(
-                    "Video can only FAIL from PROCESSING");
-        }
+  public String getId() {
+    return id;
+  }
 
-        this.status = VideoStatus.FAILED;
-        this.processingError = error;
-        this.processedAt = Instant.now();
-    }
+  public String getTitle() {
+    return title;
+  }
 
-    public boolean isActive() {
-        return this.status == VideoStatus.READY;
-    }
+  public String getObjectKey() {
+    return objectKey;
+  }
 
-    public boolean isProcessing() {
-        return this.status == VideoStatus.PROCESSING;
-    }
+  public VideoStatus getStatus() {
+    return status;
+  }
 
-    public boolean isFailed() {
-        return this.status == VideoStatus.FAILED;
-    }
+  public Double getDuration() {
+    return duration;
+  }
 
-    public String getId() {
-        return id;
-    }
+  public Long getSize() {
+    return size;
+  }
 
-    public String getTitle() {
-        return title;
-    }
+  public VideoCategory getCategory() {
+    return category;
+  }
 
-    public String getObjectKey() {
-        return objectKey;
-    }
+  public Integer getWidth() {
+    return width;
+  }
 
-    public VideoStatus getStatus() {
-        return status;
-    }
+  public Integer getHeight() {
+    return height;
+  }
 
-    public Double getDuration() {
-        return duration;
-    }
+  public String getThumbnailKey() {
+    return thumbnailKey;
+  }
 
-    public Long getSize() {
-        return size;
-    }
+  public String gethlsPlaylistKey() {
+    return hlsPlaylistKey;
+  }
 
-    public VideoCategory getCategory() {
-        return category;
-    }
+  public String getProcessingError() {
+    return processingError;
+  }
 
-    public Integer getWidth() {
-        return width;
-    }
+  public Instant getCreatedAt() {
+    return createdAt;
+  }
 
-    public Integer getHeight() {
-        return height;
-    }
-
-    public String getThumbnailKey() {
-        return thumbnailKey;
-    }
-
-    public String gethlsPlaylistKey() {
-        return hlsPlaylistKey;
-    }
-
-    public String getProcessingError() {
-        return processingError;
-    }
-
-    public Instant getCreatedAt() {
-        return createdAt;
-    }
-
-    public Instant getProcessedAt() {
-        return processedAt;
-    }
+  public Instant getProcessedAt() {
+    return processedAt;
+  }
 }

@@ -1,14 +1,11 @@
 package com.mininetflix.ministreaming.application.statistics.port;
 
-import java.util.Optional;
-
 import com.mininetflix.ministreaming.domain.statistics.VideoStatistics;
+import java.util.Optional;
 
 public interface VideoStatisticsRepository {
 
-        Optional<VideoStatistics> findByVideoId(
-                        String videoId);
+  Optional<VideoStatistics> findByVideoId(String videoId);
 
-        void save(
-                        VideoStatistics statistics);
+  void save(VideoStatistics statistics);
 }

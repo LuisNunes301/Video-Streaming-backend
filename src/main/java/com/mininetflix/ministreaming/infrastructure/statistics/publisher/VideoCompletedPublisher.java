@@ -4,6 +4,5 @@ import com.mininetflix.ministreaming.infrastructure.statistics.event.VideoComple
 
 public interface VideoCompletedPublisher {
 
-    void publish(
-            VideoCompletedEvent event);
+  void publish(VideoCompletedEvent event);
 }

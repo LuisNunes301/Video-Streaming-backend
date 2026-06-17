@@ -1,7 +1,7 @@
 package com.mininetflix.ministreaming.application.user.port;
 
 public interface PasswordEncoder {
-    String encode(String rawPassword);
+  String encode(String rawPassword);
 
-    boolean matches(String rawPassword, String encodedPassword);
+  boolean matches(String rawPassword, String encodedPassword);
 }

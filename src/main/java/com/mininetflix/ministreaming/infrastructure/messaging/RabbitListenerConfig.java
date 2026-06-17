@@ -5,5 +5,4 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @EnableRabbit
-public class RabbitListenerConfig {
-}
+public class RabbitListenerConfig {}

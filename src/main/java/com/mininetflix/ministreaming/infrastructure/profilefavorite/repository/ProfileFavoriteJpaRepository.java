@@ -1,28 +1,19 @@
 package com.mininetflix.ministreaming.infrastructure.profilefavorite.repository;
 
+import com.mininetflix.ministreaming.infrastructure.profilefavorite.entity.ProfileFavoriteEntity;
+import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.UUID;
-
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 
-import com.mininetflix.ministreaming.infrastructure.profilefavorite.entity.ProfileFavoriteEntity;
+public interface ProfileFavoriteJpaRepository extends JpaRepository<ProfileFavoriteEntity, UUID> {
 
-import jakarta.transaction.Transactional;
+  boolean existsByProfileIdAndVideoId(UUID profileId, String videoId);
 
-public interface ProfileFavoriteJpaRepository
-                extends JpaRepository<ProfileFavoriteEntity, UUID> {
+  List<ProfileFavoriteEntity> findByProfileId(UUID profileId);
 
-        boolean existsByProfileIdAndVideoId(
-                        UUID profileId,
-                        String videoId);
-
-        List<ProfileFavoriteEntity> findByProfileId(
-                        UUID profileId);
-
-        @Modifying
-        @Transactional
-        void deleteByProfileIdAndVideoId(
-                        UUID profileId,
-                        String videoId);
+  @Modifying
+  @Transactional
+  void deleteByProfileIdAndVideoId(UUID profileId, String videoId);
 }

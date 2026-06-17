@@ -4,5 +4,5 @@ import com.mininetflix.ministreaming.application.home.dto.HomeResponse;
 
 public interface GetHomeUseCase {
 
-    HomeResponse execute(String userId);
+  HomeResponse execute(String userId);
 }

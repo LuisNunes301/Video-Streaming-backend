@@ -1,18 +1,14 @@
 package com.mininetflix.ministreaming.infrastructure.content.repository;
 
+import com.mininetflix.ministreaming.domain.content.VideoCategory;
+import com.mininetflix.ministreaming.infrastructure.content.entity.VideoEntity;
 import java.util.List;
-
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.mininetflix.ministreaming.domain.content.VideoCategory;
+public interface DataVideoJpaRepository extends JpaRepository<VideoEntity, String> {
+  List<VideoEntity> findByCategory(VideoCategory category);
 
-import com.mininetflix.ministreaming.infrastructure.content.entity.VideoEntity;
+  List<VideoEntity> findByIdIn(List<String> ids);
 
-public interface DataVideoJpaRepository
-                extends JpaRepository<VideoEntity, String> {
-        List<VideoEntity> findByCategory(VideoCategory category);
-
-        List<VideoEntity> findByIdIn(List<String> ids);
-
-        List<VideoEntity> findByTitleContainingIgnoreCase(String title);
+  List<VideoEntity> findByTitleContainingIgnoreCase(String title);
 }

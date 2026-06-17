@@ -15,16 +15,16 @@ import lombok.Setter;
 @NoArgsConstructor
 public class VideoStatisticsEntity {
 
-    @Id
-    @Column(name = "video_id")
-    private String videoId;
+  @Id
+  @Column(name = "video_id")
+  private String videoId;
 
-    @Column(nullable = false)
-    private Long views;
+  @Column(nullable = false)
+  private Long views;
 
-    @Column(nullable = false)
-    private Long completedViews;
+  @Column(nullable = false)
+  private Long completedViews;
 
-    @Column(nullable = false)
-    private Double watchedSeconds;
+  @Column(nullable = false)
+  private Double watchedSeconds;
 }

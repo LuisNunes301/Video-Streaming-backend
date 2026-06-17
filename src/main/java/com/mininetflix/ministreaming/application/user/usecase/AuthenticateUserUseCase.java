@@ -4,5 +4,5 @@ import com.mininetflix.ministreaming.application.user.dto.AuthenticateUserInput;
 import com.mininetflix.ministreaming.application.user.dto.AuthenticateUserOutput;
 
 public interface AuthenticateUserUseCase {
-    AuthenticateUserOutput execute(AuthenticateUserInput input);
+  AuthenticateUserOutput execute(AuthenticateUserInput input);
 }

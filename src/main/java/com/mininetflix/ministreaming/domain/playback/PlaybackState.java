@@ -1,7 +1,6 @@
 package com.mininetflix.ministreaming.domain.playback;
 
 import java.time.Instant;
-
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -11,40 +10,39 @@ import lombok.Setter;
 @NoArgsConstructor
 public class PlaybackState {
 
-    private String userId;
-    private String contentId;
+  private String userId;
+  private String contentId;
 
-    private double currentTime;
-    private boolean completed;
-    private boolean completionRegistered;
+  private double currentTime;
+  private boolean completed;
+  private boolean completionRegistered;
 
-    private Instant lastUpdated;
+  private Instant lastUpdated;
 
-    public PlaybackState(String userId, String contentId) {
+  public PlaybackState(String userId, String contentId) {
 
-        this.userId = userId;
-        this.contentId = contentId;
+    this.userId = userId;
+    this.contentId = contentId;
 
-        this.currentTime = 0.0;
+    this.currentTime = 0.0;
 
-        this.completed = false;
+    this.completed = false;
 
-        this.completionRegistered = false;
+    this.completionRegistered = false;
 
-        this.lastUpdated = Instant.now();
+    this.lastUpdated = Instant.now();
+  }
+
+  public void updateProgress(double newTime, double officialDuration) {
+
+    if (newTime < 0) {
+      throw new IllegalArgumentException("Progress cannot be negative");
     }
 
-    public void updateProgress(double newTime, double officialDuration) {
+    this.currentTime = Math.min(newTime, officialDuration);
 
-        if (newTime < 0) {
-            throw new IllegalArgumentException("Progress cannot be negative");
-        }
+    this.completed = officialDuration > 0 && this.currentTime >= officialDuration * 0.95;
 
-        this.currentTime = Math.min(newTime, officialDuration);
-
-        this.completed = officialDuration > 0 &&
-                this.currentTime >= officialDuration * 0.95;
-
-        this.lastUpdated = Instant.now();
-    }
+    this.lastUpdated = Instant.now();
+  }
 }

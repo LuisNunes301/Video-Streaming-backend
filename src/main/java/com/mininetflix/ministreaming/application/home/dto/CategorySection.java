@@ -1,11 +1,6 @@
 package com.mininetflix.ministreaming.application.home.dto;
 
-import java.util.List;
-import java.util.Map;
-
 import com.mininetflix.ministreaming.domain.content.VideoCategory;
+import java.util.List;
 
-public record CategorySection(
-                VideoCategory category,
-                List<VideoSummaryResponse> videos) {
-}
+public record CategorySection(VideoCategory category, List<VideoSummaryResponse> videos) {}

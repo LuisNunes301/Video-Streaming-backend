@@ -4,6 +4,5 @@ import com.mininetflix.ministreaming.application.content.dto.UploadVideoInput;
 import com.mininetflix.ministreaming.application.content.dto.UploadVideoOutput;
 
 public interface UploadVideoUseCase {
-    UploadVideoOutput execute(
-            UploadVideoInput input);
+  UploadVideoOutput execute(UploadVideoInput input);
 }

@@ -4,6 +4,5 @@ import com.mininetflix.ministreaming.application.content.dto.VideoResponse;
 
 public interface GetVideoByIdUseCase {
 
-    VideoResponse execute(
-            String videoId);
+  VideoResponse execute(String videoId);
 }

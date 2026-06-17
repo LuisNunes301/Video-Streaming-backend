@@ -4,9 +4,4 @@ import com.mininetflix.ministreaming.domain.content.VideoCategory;
 import com.mininetflix.ministreaming.domain.content.VideoStatus;
 
 public record UploadVideoOutput(
-                String id,
-                String title,
-                String objectKey,
-                VideoCategory category,
-                VideoStatus status) {
-}
+    String id, String title, String objectKey, VideoCategory category, VideoStatus status) {}

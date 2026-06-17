@@ -1,16 +1,14 @@
 package com.mininetflix.ministreaming.infrastructure.content.entity;
 
-import java.time.Instant;
-
 import com.mininetflix.ministreaming.domain.content.VideoCategory;
 import com.mininetflix.ministreaming.domain.content.VideoStatus;
-
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
+import java.time.Instant;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -26,33 +24,34 @@ import lombok.Setter;
 @Setter
 public class VideoEntity {
 
-    @Id
-    private String id;
+  @Id private String id;
 
-    private String title;
+  private String title;
 
-    private String bucket;
-    private String objectKey;
+  private String bucket;
+  private String objectKey;
 
-    @Enumerated(EnumType.STRING)
-    private VideoStatus status;
-    @Enumerated(EnumType.STRING)
-    private VideoCategory category;
-    private Double duration;
-    private Long size;
-    private Integer width;
-    private Integer height;
+  @Enumerated(EnumType.STRING)
+  private VideoStatus status;
 
-    private String thumbnailKey;
-    private String hlsPlaylistKey;
+  @Enumerated(EnumType.STRING)
+  private VideoCategory category;
 
-    private String processingError;
+  private Double duration;
+  private Long size;
+  private Integer width;
+  private Integer height;
 
-    private Instant createdAt;
-    private Instant processedAt;
+  private String thumbnailKey;
+  private String hlsPlaylistKey;
 
-    @PrePersist
-    public void prePersist() {
-        this.createdAt = Instant.now();
-    }
+  private String processingError;
+
+  private Instant createdAt;
+  private Instant processedAt;
+
+  @PrePersist
+  public void prePersist() {
+    this.createdAt = Instant.now();
+  }
 }

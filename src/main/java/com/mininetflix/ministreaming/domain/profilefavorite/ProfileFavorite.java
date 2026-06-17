@@ -5,39 +5,35 @@ import java.util.UUID;
 
 public class ProfileFavorite {
 
-    private final UUID id;
+  private final UUID id;
 
-    private final UUID profileId;
+  private final UUID profileId;
 
-    private final String videoId;
+  private final String videoId;
 
-    private final LocalDateTime createdAt;
+  private final LocalDateTime createdAt;
 
-    public ProfileFavorite(
-            UUID id,
-            UUID profileId,
-            String videoId,
-            LocalDateTime createdAt) {
+  public ProfileFavorite(UUID id, UUID profileId, String videoId, LocalDateTime createdAt) {
 
-        this.id = id;
-        this.profileId = profileId;
-        this.videoId = videoId;
-        this.createdAt = createdAt;
-    }
+    this.id = id;
+    this.profileId = profileId;
+    this.videoId = videoId;
+    this.createdAt = createdAt;
+  }
 
-    public UUID getId() {
-        return id;
-    }
+  public UUID getId() {
+    return id;
+  }
 
-    public UUID getProfileId() {
-        return profileId;
-    }
+  public UUID getProfileId() {
+    return profileId;
+  }
 
-    public String getVideoId() {
-        return videoId;
-    }
+  public String getVideoId() {
+    return videoId;
+  }
 
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
+  public LocalDateTime getCreatedAt() {
+    return createdAt;
+  }
 }

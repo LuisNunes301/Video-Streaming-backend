@@ -1,67 +1,55 @@
 package com.mininetflix.ministreaming.application.playback.usecase;
 
-import org.springframework.stereotype.Service;
-
 import com.mininetflix.ministreaming.application.content.port.VideoCatalogRepository;
 import com.mininetflix.ministreaming.application.playback.dto.SavePlaybackProgressInput;
 import com.mininetflix.ministreaming.application.playback.port.PlaybackRepository;
 import com.mininetflix.ministreaming.domain.playback.PlaybackState;
 import com.mininetflix.ministreaming.infrastructure.statistics.event.VideoCompletedEvent;
 import com.mininetflix.ministreaming.infrastructure.statistics.publisher.VideoCompletedPublisher;
+import org.springframework.stereotype.Service;
 
 @Service
-public class SavePlaybackProgressUseCaseImpl
-                implements SavePlaybackProgressUseCase {
+public class SavePlaybackProgressUseCaseImpl implements SavePlaybackProgressUseCase {
 
-        private final PlaybackRepository playbackRepository;
-        private final VideoCatalogRepository videoCatalogRepository;
-        private final VideoCompletedPublisher publisher;
+  private final PlaybackRepository playbackRepository;
+  private final VideoCatalogRepository videoCatalogRepository;
+  private final VideoCompletedPublisher publisher;
 
-        public SavePlaybackProgressUseCaseImpl(
-                        PlaybackRepository playbackRepository,
-                        VideoCatalogRepository videoCatalogRepository,
-                        VideoCompletedPublisher publisher) {
+  public SavePlaybackProgressUseCaseImpl(
+      PlaybackRepository playbackRepository,
+      VideoCatalogRepository videoCatalogRepository,
+      VideoCompletedPublisher publisher) {
 
-                this.playbackRepository = playbackRepository;
-                this.videoCatalogRepository = videoCatalogRepository;
-                this.publisher = publisher;
-        }
+    this.playbackRepository = playbackRepository;
+    this.videoCatalogRepository = videoCatalogRepository;
+    this.publisher = publisher;
+  }
 
-        @Override
-        public void execute(
-                        SavePlaybackProgressInput input) {
+  @Override
+  public void execute(SavePlaybackProgressInput input) {
 
-                var video = videoCatalogRepository
-                                .findById(input.contentId())
-                                .orElseThrow(() -> new IllegalArgumentException(
-                                                "Video not found"));
+    var video =
+        videoCatalogRepository
+            .findById(input.contentId())
+            .orElseThrow(() -> new IllegalArgumentException("Video not found"));
 
-                double officialDuration = video.getDuration();
+    double officialDuration = video.getDuration();
 
-                PlaybackState state = playbackRepository
-                                .findByUserAndContent(
-                                                input.userId(),
-                                                input.contentId())
-                                .orElseGet(() -> new PlaybackState(
-                                                input.userId(),
-                                                input.contentId()));
+    PlaybackState state =
+        playbackRepository
+            .findByUserAndContent(input.userId(), input.contentId())
+            .orElseGet(() -> new PlaybackState(input.userId(), input.contentId()));
 
-                state.updateProgress(
-                                input.currentTime(),
-                                officialDuration);
+    state.updateProgress(input.currentTime(), officialDuration);
 
-                if (state.isCompleted()
-                                && !state.isCompletionRegistered()) {
+    if (state.isCompleted() && !state.isCompletionRegistered()) {
 
-                        publisher.publish(
-                                        new VideoCompletedEvent(
-                                                        input.userId(),
-                                                        input.contentId(),
-                                                        officialDuration));
+      publisher.publish(
+          new VideoCompletedEvent(input.userId(), input.contentId(), officialDuration));
 
-                        state.setCompletionRegistered(true);
-                }
+      state.setCompletionRegistered(true);
+    }
 
-                playbackRepository.save(state);
-        }
+    playbackRepository.save(state);
+  }
 }

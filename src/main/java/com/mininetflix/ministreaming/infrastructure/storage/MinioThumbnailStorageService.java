@@ -1,38 +1,26 @@
 package com.mininetflix.ministreaming.infrastructure.storage;
 
-import java.io.File;
-
-import org.springframework.stereotype.Service;
-
 import com.mininetflix.ministreaming.application.storage.StorageBucketEnum;
 import com.mininetflix.ministreaming.application.storage.StorageService;
-
+import java.io.File;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class MinioThumbnailStorageService
-                implements ThumbnailStorageService {
+public class MinioThumbnailStorageService implements ThumbnailStorageService {
 
-        private final StorageService storageService;
+  private final StorageService storageService;
 
-        @Override
-        public void upload(
-                        String objectKey,
-                        File file) {
+  @Override
+  public void upload(String objectKey, File file) {
 
-                storageService.uploadFile(
-                                StorageBucketEnum.THUMBNAILS,
-                                objectKey,
-                                file);
-        }
+    storageService.uploadFile(StorageBucketEnum.THUMBNAILS, objectKey, file);
+  }
 
-        @Override
-        public String getPublicUrl(
-                        String objectKey) {
+  @Override
+  public String getPublicUrl(String objectKey) {
 
-                return storageService.generatePublicUrl(
-                                StorageBucketEnum.THUMBNAILS,
-                                objectKey);
-        }
+    return storageService.generatePublicUrl(StorageBucketEnum.THUMBNAILS, objectKey);
+  }
 }

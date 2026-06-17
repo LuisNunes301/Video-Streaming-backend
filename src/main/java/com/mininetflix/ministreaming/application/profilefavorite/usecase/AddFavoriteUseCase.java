@@ -4,7 +4,5 @@ import java.util.UUID;
 
 public interface AddFavoriteUseCase {
 
-    void execute(
-            UUID userId,
-            String videoId);
+  void execute(UUID userId, String videoId);
 }

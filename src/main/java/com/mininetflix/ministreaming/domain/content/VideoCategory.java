@@ -1,20 +1,19 @@
 package com.mininetflix.ministreaming.domain.content;
 
 public enum VideoCategory {
+  MUSIC,
 
-    MUSIC,
+  DOCUMENTARY,
 
-    DOCUMENTARY,
+  TECHNOLOGY,
 
-    TECHNOLOGY,
+  EDUCATION,
 
-    EDUCATION,
+  SPORTS,
 
-    SPORTS,
+  NEWS,
 
-    NEWS,
+  GAMING,
 
-    GAMING,
-
-    ENTERTAINMENT
+  ENTERTAINMENT
 }

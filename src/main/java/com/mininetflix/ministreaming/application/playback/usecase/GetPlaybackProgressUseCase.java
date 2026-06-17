@@ -1,9 +1,8 @@
 package com.mininetflix.ministreaming.application.playback.usecase;
 
+import com.mininetflix.ministreaming.domain.playback.PlaybackState;
 import java.util.Optional;
 
-import com.mininetflix.ministreaming.domain.playback.PlaybackState;
-
 public interface GetPlaybackProgressUseCase {
-    Optional<PlaybackState> execute(String userId, String contentId);
+  Optional<PlaybackState> execute(String userId, String contentId);
 }

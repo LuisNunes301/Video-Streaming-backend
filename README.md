@@ -410,6 +410,15 @@ MinIO utilizado para:
 * Controle por Roles
 
 ---
+```
+Linter 
+executar
+mvn spotless:apply
+
+verificar
+mvn spotless:check
+```
+___
 
 # Executando com Docker
 
