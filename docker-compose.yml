@@ -15,12 +15,18 @@ services:
       - "${POSTGRES_PORT}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
   redis:
     image: redis:7
     container_name: mini_redis
+    restart: always
     env_file:
       - .env
-    restart: always
     ports:
       - "${REDIS_PORT}:6379"
 
@@ -61,13 +67,15 @@ services:
     entrypoint: >
       /bin/sh -c "
       echo 'Aguardando MinIO...';
-      sleep 5;
-      mc alias set local http://minio:9000 ${MINIO_USER} ${MINIO_PASSWORD};
+      until mc alias set local http://minio:9000 ${MINIO_USER} ${MINIO_PASSWORD}; do
+        sleep 2;
+      done;
       mc mb local/videos || true;
       mc anonymous set download local/videos;
-      echo 'Bucket configurado como público';
+      echo 'Bucket configurado';
       exit 0;
       "
+
   nginx:
     image: nginx:latest
     container_name: mini_nginx
@@ -79,8 +87,9 @@ services:
     depends_on:
       - app
       - minio
+
   app:
-    build: .
+    image: ludev002/ministreaming:1.0.0
     container_name: mini_app
     restart: always
     env_file:
