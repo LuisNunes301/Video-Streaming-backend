@@ -17,6 +17,7 @@ import com.mininetflix.ministreaming.application.content.dto.UploadVideoInput;
 import com.mininetflix.ministreaming.application.content.dto.UploadVideoOutput;
 import com.mininetflix.ministreaming.application.content.dto.VideoResponse;
 import com.mininetflix.ministreaming.application.content.port.VideoCatalogRepository;
+import com.mininetflix.ministreaming.application.content.usecase.GetVideoByIdUseCase;
 import com.mininetflix.ministreaming.application.content.usecase.ListVideosByCategoryUseCase;
 import com.mininetflix.ministreaming.application.content.usecase.ListVideosUseCase;
 import com.mininetflix.ministreaming.application.content.usecase.SearchVideosUseCase;
@@ -29,19 +30,19 @@ import com.mininetflix.ministreaming.domain.content.VideoContent;
 public class VideoUploadController {
 
         private final UploadVideoUseCase uploadVideoUseCase;
-        private final VideoCatalogRepository catalogRepository;
+        private final GetVideoByIdUseCase getVideoByIdUseCase;
         private final ListVideosUseCase listVideoUseCase;
         private final ListVideosByCategoryUseCase listVideosByCategoryUseCase;
         private final SearchVideosUseCase searchVideosUseCase;
 
         public VideoUploadController(
                         UploadVideoUseCase uploadVideoUseCase,
-                        VideoCatalogRepository catalogRepository,
+                        GetVideoByIdUseCase getVideoByIdUseCase,
                         ListVideosUseCase listVideoUseCase, ListVideosByCategoryUseCase listVideosByCategoryUseCase,
                         SearchVideosUseCase searchVideosUseCase, SearchVideosUseCaseImpl searchVideosUseCaseImpl) {
 
                 this.uploadVideoUseCase = uploadVideoUseCase;
-                this.catalogRepository = catalogRepository;
+                this.getVideoByIdUseCase = getVideoByIdUseCase;
                 this.listVideoUseCase = listVideoUseCase;
                 this.listVideosByCategoryUseCase = listVideosByCategoryUseCase;
                 this.searchVideosUseCase = searchVideosUseCase;
@@ -71,11 +72,11 @@ public class VideoUploadController {
         }
 
         @GetMapping("/{id}")
-        public ResponseEntity<VideoContent> getById(@PathVariable String id) {
+        public ResponseEntity<VideoResponse> getById(
+                        @PathVariable String id) {
 
-                return catalogRepository.findById(id)
-                                .map(ResponseEntity::ok)
-                                .orElse(ResponseEntity.notFound().build());
+                return ResponseEntity.ok(
+                                getVideoByIdUseCase.execute(id));
         }
 
         @GetMapping("/category/{category}")

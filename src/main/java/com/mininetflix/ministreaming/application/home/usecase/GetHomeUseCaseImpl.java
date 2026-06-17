@@ -5,6 +5,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import com.mininetflix.ministreaming.application.content.port.VideoCatalogRepository;
@@ -29,6 +30,7 @@ public class GetHomeUseCaseImpl implements GetHomeUseCase {
         private final GetTrendingVideosUseCase trendingUseCase;
 
         @Override
+        @Cacheable("home")
         public HomeResponse execute(String userId) {
 
                 List<VideoSummaryResponse> trending = buildTrending();

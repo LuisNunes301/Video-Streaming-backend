@@ -10,7 +10,6 @@ import com.mininetflix.ministreaming.application.content.port.VideoCatalogReposi
 import com.mininetflix.ministreaming.application.content.port.VideoStorageService;
 import com.mininetflix.ministreaming.application.playback.dto.ContinueWatchingItem;
 import com.mininetflix.ministreaming.application.playback.port.PlaybackRepository;
-import com.mininetflix.ministreaming.domain.content.VideoContent;
 import com.mininetflix.ministreaming.domain.playback.PlaybackState;
 
 import lombok.RequiredArgsConstructor;
