@@ -20,6 +20,11 @@ import org.springframework.test.web.servlet.MockMvc;
 import com.mininetflix.ministreaming.application.content.dto.UploadVideoInput;
 import com.mininetflix.ministreaming.application.content.dto.UploadVideoOutput;
 import com.mininetflix.ministreaming.application.content.port.VideoCatalogRepository;
+import com.mininetflix.ministreaming.application.content.usecase.GetVideoByIdUseCase;
+import com.mininetflix.ministreaming.application.content.usecase.ListVideosByCategoryUseCase;
+import com.mininetflix.ministreaming.application.content.usecase.ListVideosUseCase;
+import com.mininetflix.ministreaming.application.content.usecase.SearchVideosUseCase;
+import com.mininetflix.ministreaming.application.content.usecase.SearchVideosUseCaseImpl;
 import com.mininetflix.ministreaming.application.content.usecase.UploadVideoUseCase;
 import com.mininetflix.ministreaming.domain.content.VideoCategory;
 import com.mininetflix.ministreaming.domain.content.VideoStatus;
@@ -29,12 +34,23 @@ import com.mininetflix.ministreaming.web.controller.content.VideoUploadControlle
 @WebMvcTest(VideoUploadController.class)
 @Import(WebMvcTestSecurityConfig.class)
 class VideoUploadControllerIntegrationTest {
-
         @Autowired
         private MockMvc mockMvc;
 
         @MockitoBean
         private UploadVideoUseCase uploadVideoUseCase;
+
+        @MockitoBean
+        private GetVideoByIdUseCase getVideoByIdUseCase;
+
+        @MockitoBean
+        private ListVideosUseCase listVideosUseCase;
+
+        @MockitoBean
+        private ListVideosByCategoryUseCase listVideosByCategoryUseCase;
+
+        @MockitoBean
+        private SearchVideosUseCase searchVideosUseCase;
 
         @MockitoBean
         private VideoCatalogRepository catalogRepository;
@@ -50,7 +66,6 @@ class VideoUploadControllerIntegrationTest {
 
                 UploadVideoOutput output = new UploadVideoOutput(
                                 "123",
-
                                 "My Video",
                                 "123/original.mp4",
                                 VideoCategory.MUSIC,
@@ -62,14 +77,13 @@ class VideoUploadControllerIntegrationTest {
                 mockMvc.perform(
                                 multipart("/videos/upload")
                                                 .file(file)
-                                                .param("title", "My Video"))
+                                                .param("title", "My Video")
+                                                .param("category", "MUSIC"))
                                 .andExpect(status().isAccepted())
                                 .andExpect(jsonPath("$.id").value("123"))
                                 .andExpect(jsonPath("$.title").value("My Video"))
-                                .andExpect(jsonPath("$.objectKey")
-                                                .value("123/original.mp4"))
-                                .andExpect(jsonPath("$.status")
-                                                .value("PROCESSING"));
+                                .andExpect(jsonPath("$.objectKey").value("123/original.mp4"))
+                                .andExpect(jsonPath("$.status").value("PROCESSING"));
 
                 verify(uploadVideoUseCase)
                                 .execute(any(UploadVideoInput.class));

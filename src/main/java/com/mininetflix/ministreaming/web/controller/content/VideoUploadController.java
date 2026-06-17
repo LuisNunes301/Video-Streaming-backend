@@ -35,7 +35,8 @@ public class VideoUploadController {
         public VideoUploadController(
                         UploadVideoUseCase uploadVideoUseCase,
                         GetVideoByIdUseCase getVideoByIdUseCase,
-                        ListVideosUseCase listVideoUseCase, ListVideosByCategoryUseCase listVideosByCategoryUseCase,
+                        ListVideosUseCase listVideoUseCase,
+                        ListVideosByCategoryUseCase listVideosByCategoryUseCase,
                         SearchVideosUseCase searchVideosUseCase) {
 
                 this.uploadVideoUseCase = uploadVideoUseCase;
